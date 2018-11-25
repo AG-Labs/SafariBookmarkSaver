@@ -3,6 +3,7 @@ import plistlib
 import subprocess
 import os
 import re
+from shutil import copy
 
 global idKey
 idKey = 0
@@ -75,15 +76,15 @@ def saveSiteAsPicture(inLink, inFilename,inTriedShellCommands):
 	else:
 		argstring = "webkit2png " + ignoreSSL + link + width + "--delay=15 " +imSize + filename
 	inTriedShellCommands.append(argstring)
-	subprocess.run(argstring, shell=True)
+	subprocess.run(argstring, shell=True, stdout=subprocess.DEVNULL)
 
 def writeTesterToFil(inTried, inArgs, inFailed, inSucceed, inATried):
 	#save outputs to txt files for easier checking
-	a = "bookmarks Tried.txt"
-	b = "shellargs.txt"
-	c = "bookmarks failed.txt"
+	a = "All Bookmarks.txt"
+	b = "Shellargs.txt"
+	c = "Bookmarks Bailed.txt"
 	d = "bookmarks Succeeded.txt"
-	e = "bookmarks actually tried.txt"
+	e = "Tried Bookmarks.txt"
 	with open(a, mode = 'wt' ) as myFile:
 		for entry in inTried:
 			myFile.write(str(entry))
@@ -101,11 +102,8 @@ def writeTesterToFil(inTried, inArgs, inFailed, inSucceed, inATried):
 			myFile.write(str(entry))
 			myFile.write('\n')
 	with open(b, mode = 'wt') as myFile:
-		print("\n\n")
 		for entry in inArgs:
 			entry = entry.replace(u'\xa0', u' ')
-			print("\n")
-			print(entry)
 			myFile.write(entry)
 			myFile.write('\n')
 
@@ -118,6 +116,7 @@ def checkSavedBookmarks(inAttempts, outSucceed, outFailed):
 			outFailed.append(entry)
 
 def loopAndSaveBookmarks(inBookmarkDict, outAllStore , outAttemptedStore, outAttemptedArgs ):
+	urlList = {}
 	for key, entry in inBookmarkDict.items():
 		#Remove unsafe characters from web titles and create a full file path and
 		#append to to storage dictionary checkers
@@ -128,25 +127,38 @@ def loopAndSaveBookmarks(inBookmarkDict, outAllStore , outAttemptedStore, outAtt
 		entry['fileName'] = fullString
 		outAllStore.append(entry)
 
-		#check for existence of file and folder, pass if file already saved or create file and 
-		#folder
-		if os.path.isdir(folderPath):
-			fullFilePath = fullString + "-full.png"
-			if os.path.isfile(fullFilePath):
-				pass
-			else:
+		if entry['URL'] in urlList:
+			try:
+				copy(urlList[entry['URL']], folderPath)
+			except:
 				outAttemptedStore.append(entry)
 				req = Request(entry['URL'], headers={'User-Agent': 'Mozilla/5.0'})
 				try:
 					requestCode = urlopen(req).getcode()
 					saveSiteAsPicture(entry['URL'], fullString,outAttemptedArgs)
-				except:
-					#logg HTTP error if needed
+		else: 
+			fullFilePath = fullString + "-full.png"
+			#check for existence of file and folder, pass if file already saved or create file and 
+			#folder
+			if os.path.isdir(folderPath):
+				if os.path.isfile(fullFilePath):
 					pass
-		else:
-			os.makedirs(folderPath)
-			outAttemptedStore.append(entry)
-			saveSiteAsPicture(entry['URL'], fullString,outAttemptedArgs)
+				else:
+					outAttemptedStore.append(entry)
+					req = Request(entry['URL'], headers={'User-Agent': 'Mozilla/5.0'})
+					try:
+						requestCode = urlopen(req).getcode()
+						saveSiteAsPicture(entry['URL'], fullString,outAttemptedArgs)
+						urlList[entry['URL']] = fullFilePath
+
+					except:
+						#logg HTTP error if needed
+						pass
+			else:
+				os.makedirs(folderPath)
+				outAttemptedStore.append(entry)
+				saveSiteAsPicture(entry['URL'], fullString,outAttemptedArgs)
+				urlList[entry['URL']] = fullFilePath
 
 if __name__ == '__main__':
 	main()
