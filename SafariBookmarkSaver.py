@@ -31,15 +31,21 @@ def main():
 
 	bookmarksDict = {}
 	recursiveSearch(reducedList, saveToFolder, bookmarksDict)
+	filesPresent = folderSearch(saveToFolder)
+	updatedBookmarksDict = reduceDictionary(bookmarksDict, filesPresent)
 
-	allNameStore = []
-	triedShellCommands = []
-	triedNameStore = []
+	print('\n\n')
+	print(len(bookmarksDict))
+	print(len(updatedBookmarksDict))
 
-	loopAndSaveBookmarks(bookmarksDict, allNameStore, triedNameStore, triedShellCommands)
+	allNameStore = [] #used in check saved Bookmarks
+	triedShellCommands = [] #
+	triedNameStore = [] #
 
-	failedNameStore = []
-	succeededNameStore = []
+	loopAndSaveBookmarks(updatedBookmarksDict, allNameStore, triedNameStore, triedShellCommands)
+
+	failedNameStore = [] # used in check saved Bookmarks
+	succeededNameStore = [] # used in check saved Bookmarks
 
 	checkSavedBookmarks(allNameStore, succeededNameStore, failedNameStore)
 	writeTesterToFil(allNameStore, triedShellCommands, failedNameStore, succeededNameStore, triedNameStore)
@@ -57,11 +63,29 @@ def recursiveSearch(inDict, inString, outDict):
 			if 'URLString' in aChild:
 				tempURLString = aChild['URLString']
 				reducedURLString = re.sub('\?.*$', '', tempURLString)
-				fileName = aChild['URIDictionary']['title']
+				fileName = re.sub('[^A-Za-z0-9/\s]+', '', aChild['URIDictionary']['title'])
 
 				tempEntry = {'folder': inString, 'fileName': fileName,'URL': reducedURLString}
 				outDict[idKey] = tempEntry
 				idKey = idKey + 1
+
+def folderSearch(inRoot):
+	identifiedFiles = []
+	for root, _, files in os.walk(inRoot, topdown=False):
+		for name in files:
+			if name != '.DS_Store':
+				identifiedFiles.append(os.path.join(root, name))
+	return identifiedFiles
+
+def reduceDictionary(inBookmarks, inFiles):
+	outBookmarks = dict(inBookmarks)
+	for key, entry in inBookmarks.items():
+		fullFilePath = entry['folder'] + '/' + entry['fileName'] + '-full.png'
+		if fullFilePath in inFiles:
+			del outBookmarks[key]
+		else:
+			print(fullFilePath)
+	return outBookmarks
 
 def saveSiteAsPicture(inLink, inFilename,inTriedShellCommands):
 	#take file name path and link and add arguments to shell commands pointer
@@ -80,11 +104,11 @@ def saveSiteAsPicture(inLink, inFilename,inTriedShellCommands):
 
 def writeTesterToFil(inTried, inArgs, inFailed, inSucceed, inATried):
 	#save outputs to txt files for easier checking
-	a = "All Bookmarks.txt"
-	b = "Shellargs.txt"
-	c = "Bookmarks Bailed.txt"
+	a = "bookmarks Tried.txt"
+	b = "shellargs.txt"
+	c = "bookmarks failed.txt"
 	d = "bookmarks Succeeded.txt"
-	e = "Tried Bookmarks.txt"
+	e = "bookmarks actually tried.txt"
 	with open(a, mode = 'wt' ) as myFile:
 		for entry in inTried:
 			myFile.write(str(entry))
@@ -102,6 +126,7 @@ def writeTesterToFil(inTried, inArgs, inFailed, inSucceed, inATried):
 			myFile.write(str(entry))
 			myFile.write('\n')
 	with open(b, mode = 'wt') as myFile:
+		print("\n\n")
 		for entry in inArgs:
 			entry = entry.replace(u'\xa0', u' ')
 			myFile.write(entry)
@@ -117,12 +142,14 @@ def checkSavedBookmarks(inAttempts, outSucceed, outFailed):
 
 def loopAndSaveBookmarks(inBookmarkDict, outAllStore , outAttemptedStore, outAttemptedArgs ):
 	urlList = {}
+	temptemptemp = 0
 	for key, entry in inBookmarkDict.items():
+		temptemptemp += 1
 		#Remove unsafe characters from web titles and create a full file path and
 		#append to to storage dictionary checkers
 		folderPath = entry['folder']
-		escapedFileName = re.sub('[^A-Za-z0-9/\s]+', '', entry['fileName'])
-		end = '/' + escapedFileName
+#		escapedFileName = re.sub('[^A-Za-z0-9/\s]+', '', entry['fileName'])
+		end = '/' + entry['fileName']
 		fullString = folderPath + end
 		entry['fileName'] = fullString
 		outAllStore.append(entry)
@@ -136,29 +163,35 @@ def loopAndSaveBookmarks(inBookmarkDict, outAllStore , outAttemptedStore, outAtt
 				try:
 					requestCode = urlopen(req).getcode()
 					saveSiteAsPicture(entry['URL'], fullString,outAttemptedArgs)
-		else: 
+				except:
+					pass
+		else:
 			fullFilePath = fullString + "-full.png"
 			#check for existence of file and folder, pass if file already saved or create file and 
 			#folder
 			if os.path.isdir(folderPath):
-				if os.path.isfile(fullFilePath):
+				outAttemptedStore.append(entry)
+				req = Request(entry['URL'], headers={'User-Agent': 'Mozilla/5.0'})
+				try:
+					requestCode = urlopen(req).getcode()
+					saveSiteAsPicture(entry['URL'], fullString,outAttemptedArgs)
+					urlList[entry['URL']] = fullFilePath
+				except:
+					#logg HTTP error if needed
 					pass
-				else:
-					outAttemptedStore.append(entry)
-					req = Request(entry['URL'], headers={'User-Agent': 'Mozilla/5.0'})
-					try:
-						requestCode = urlopen(req).getcode()
-						saveSiteAsPicture(entry['URL'], fullString,outAttemptedArgs)
-						urlList[entry['URL']] = fullFilePath
-
-					except:
-						#logg HTTP error if needed
-						pass
 			else:
 				os.makedirs(folderPath)
 				outAttemptedStore.append(entry)
-				saveSiteAsPicture(entry['URL'], fullString,outAttemptedArgs)
-				urlList[entry['URL']] = fullFilePath
+				req = Request(entry['URL'], headers={'User-Agent': 'Mozilla/5.0'})
+				try:
+					requestCode = urlopen(req).getcode()
+					saveSiteAsPicture(entry['URL'], fullString,outAttemptedArgs)
+					urlList[entry['URL']] = fullFilePath
+				except:
+					#logg HTTP error if needed
+					pass
+	print(temptemptemp,'loops through this function')
+
 
 if __name__ == '__main__':
 	main()
