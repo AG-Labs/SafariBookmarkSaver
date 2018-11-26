@@ -16,6 +16,8 @@ To run simply fill in, if desired a sub directory to start from in the reducedTi
 
 Once run the result will be an folder with a png for every bookmark and a single text file containing details of any bookmarks that could not be saved. 
 
+![Example Folder](Example-Output.png)
+
 ## Authors
 
 * **Andrew Godley** - *All Work* - [AG Labs](https://github.com/AG-Labs)
