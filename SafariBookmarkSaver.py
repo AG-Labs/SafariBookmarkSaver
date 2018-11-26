@@ -30,13 +30,13 @@ def main():
 	    reducedList = [item for item in bookmarksMenu if 'Title' in item and item['Title'] == reducedTitle]
 
 	bookmarksDict = {}
+	print('---- Finding All Bookmarks & Files ----')
 	recursiveSearch(reducedList, saveToFolder, bookmarksDict)
 	filesPresent = folderSearch(saveToFolder)
-	updatedBookmarksDict = reduceDictionary(bookmarksDict, filesPresent)
-
-	print('\n\n')
-	print(len(bookmarksDict))
-	print(len(updatedBookmarksDict))
+	print('---- Reducing Bookmarks ----')
+	reducedBookmarksDict = reduceDictionary(bookmarksDict, filesPresent)
+	print('---- Updating File Locations ----')
+	updatedBookmarksDict = movedBookmarks(reducedBookmarksDict, filesPresent)
 
 	allNameStore = [] #used in check saved Bookmarks
 	triedShellCommands = [] #
@@ -70,11 +70,11 @@ def recursiveSearch(inDict, inString, outDict):
 				idKey = idKey + 1
 
 def folderSearch(inRoot):
-	identifiedFiles = []
+	identifiedFiles = {}
 	for root, _, files in os.walk(inRoot, topdown=False):
 		for name in files:
 			if name != '.DS_Store':
-				identifiedFiles.append(os.path.join(root, name))
+				identifiedFiles[os.path.join(root, name)] = name
 	return identifiedFiles
 
 def reduceDictionary(inBookmarks, inFiles):
@@ -83,8 +83,17 @@ def reduceDictionary(inBookmarks, inFiles):
 		fullFilePath = entry['folder'] + '/' + entry['fileName'] + '-full.png'
 		if fullFilePath in inFiles:
 			del outBookmarks[key]
-		else:
-			print(fullFilePath)
+	return outBookmarks
+
+def movedBookmarks(inBookmarks, inFiles):
+	outBookmarks = dict(inBookmarks)
+	for key, entry in inBookmarks.items():
+		testString = entry['fileName'] + '-full.png'
+		for key2, value in inFiles.items():
+			if testString == value:
+				destination = entry['folder']+'/'+entry['fileName'] +'-full.png'
+				copy(key2, destination)
+				del outBookmarks[key]
 	return outBookmarks
 
 def saveSiteAsPicture(inLink, inFilename,inTriedShellCommands):
@@ -94,7 +103,6 @@ def saveSiteAsPicture(inLink, inFilename,inTriedShellCommands):
 	imSize = "-F "
 	ignoreSSL = "--ignore-ssl-check "
 	filename = "-o " + "\'" + inFilename + "\'"
-	#arguments = ["webkit2png", link, width, "--delay=5 ",imSize , filename]
 	if link.startswith("https"):
 		argstring = "webkit2png " + link + width + "--delay=10 " +imSize + filename
 	else:
@@ -146,7 +154,6 @@ def loopAndSaveBookmarks(inBookmarkDict, outAllStore , outAttemptedStore, outAtt
 		#Remove unsafe characters from web titles and create a full file path and
 		#append to to storage dictionary checkers
 		folderPath = entry['folder']
-#		escapedFileName = re.sub('[^A-Za-z0-9/\s]+', '', entry['fileName'])
 		end = '/' + entry['fileName']
 		fullString = folderPath + end
 		entry['fileName'] = fullString
@@ -188,6 +195,7 @@ def loopAndSaveBookmarks(inBookmarkDict, outAllStore , outAttemptedStore, outAtt
 				except:
 					#logg HTTP error if needed
 					pass
+
 
 if __name__ == '__main__':
 	main()
