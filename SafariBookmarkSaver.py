@@ -142,9 +142,7 @@ def checkSavedBookmarks(inAttempts, outSucceed, outFailed):
 
 def loopAndSaveBookmarks(inBookmarkDict, outAllStore , outAttemptedStore, outAttemptedArgs ):
 	urlList = {}
-	temptemptemp = 0
 	for key, entry in inBookmarkDict.items():
-		temptemptemp += 1
 		#Remove unsafe characters from web titles and create a full file path and
 		#append to to storage dictionary checkers
 		folderPath = entry['folder']
@@ -190,8 +188,6 @@ def loopAndSaveBookmarks(inBookmarkDict, outAllStore , outAttemptedStore, outAtt
 				except:
 					#logg HTTP error if needed
 					pass
-	print(temptemptemp,'loops through this function')
-
 
 if __name__ == '__main__':
 	main()
