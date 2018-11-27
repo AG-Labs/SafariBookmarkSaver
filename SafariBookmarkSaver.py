@@ -41,17 +41,18 @@ def main():
 	updatedBookmarksDict = movedBookmarks(reducedBookmarksDict, filesPresent)
 	
 	print('---- Deleting Old Files ----')
+	filesPresent = folderSearch(saveToFolder)
+	identifyDeletedBookmarks(bookmarksDict, filesPresent)
 
-
+	print('---- Saving New Bookmarks ----')
 	allNameStore = [] #used in check saved Bookmarks
 	triedShellCommands = [] #
 	triedNameStore = [] #
-
 	loopAndSaveBookmarks(updatedBookmarksDict, allNameStore, triedNameStore, triedShellCommands)
 
+	print('---- Finishing ----')
 	failedNameStore = [] # used in check saved Bookmarks
 	succeededNameStore = [] # used in check saved Bookmarks
-
 	checkSavedBookmarks(allNameStore, succeededNameStore, failedNameStore)
 	writeTesterToFil(allNameStore, triedShellCommands, failedNameStore, succeededNameStore, triedNameStore)
 
@@ -69,12 +70,12 @@ def recursiveSearch(inDict, inString, outDict):
 				tempURLString = aChild['URLString']
 				reducedURLString = re.sub('\?.*$', '', tempURLString)
 				fileName = re.sub('[^A-Za-z0-9/\s]+', '', aChild['URIDictionary']['title'])
-
 				tempEntry = {'folder': inString, 'fileName': fileName,'URL': reducedURLString}
 				outDict[idKey] = tempEntry
 				idKey = idKey + 1
 
 def folderSearch(inRoot):
+	#return dictionary of file/folder structure for the destination folder
 	identifiedFiles = {}
 	for root, _, files in os.walk(inRoot, topdown=False):
 		for name in files:
@@ -83,6 +84,8 @@ def folderSearch(inRoot):
 	return identifiedFiles
 
 def reduceDictionary(inBookmarks, inFiles):
+	#compare dictionary of bookmarks to dictionary of destination files
+	#return dictionary of bookmarks which do not exist in the destination
 	outBookmarks = dict(inBookmarks)
 	for key, entry in inBookmarks.items():
 		fullFilePath = entry['folder'] + '/' + entry['fileName'] + '-full.png'
@@ -91,21 +94,35 @@ def reduceDictionary(inBookmarks, inFiles):
 	return outBookmarks
 
 def movedBookmarks(inBookmarks, inFiles):
+	#check dictionary of bookmarks against destination files
+	#if a missing bookmark exists in a different folder, copy it to destination location
 	outBookmarks = dict(inBookmarks)
 	for key, entry in inBookmarks.items():
-		print('checking', entry)
 		testString = entry['fileName'] + '-full.png'
 		for key2, value in inFiles.items():
 			destination = entry['folder']+'/'+entry['fileName'] +'-full.png'
+			#check filename of missing against all other filenames
+			# if a match is found and it is not of the same location copy
+			#file and remove from dictionary of bookmarks
 			if (testString == value and key2 != destination):
-				print('\n\n', key2, '\n', destination)
-				print('against', key2, '-', value)
 				if not os.path.isdir(entry['folder']):
 					os.mkdir(entry['folder'])
 				copy(key2, destination)
 				del outBookmarks[key]
 				break
 	return outBookmarks
+
+def identifyDeletedBookmarks(inBookmarks, inFiles):
+	#compare all current files against all current bookmarks, if present in files and not
+	#bookmarks delete file at that path
+	for key, entry in inFiles.items():
+		presentFlag = 0
+		for key2, value in inBookmarks.items():
+			testSting = value['folder']+'/'+value['fileName']+'-full.png'
+			if key == testSting:
+				presentFlag = 1
+		if presentFlag == 0:
+			os.remove(key)
 
 def saveSiteAsPicture(inLink, inFilename,inTriedShellCommands):
 	#take file name path and link and add arguments to shell commands pointer
@@ -172,7 +189,8 @@ def loopAndSaveBookmarks(inBookmarkDict, outAllStore , outAttemptedStore, outAtt
 
 		if entry['URL'] in urlList:
 			try:
-				#TODO: add creation of folder and test here, to match the movedBookmarks function ----------------
+				if not os.path.isdir(folderPath):
+					os.mkdir(folderPath)
 				copy(urlList[entry['URL']], folderPath)
 			except:
 				outAttemptedStore.append(entry)
@@ -207,7 +225,6 @@ def loopAndSaveBookmarks(inBookmarkDict, outAllStore , outAttemptedStore, outAtt
 				except:
 					#logg HTTP error if needed
 					pass
-
 
 if __name__ == '__main__':
 	main()
