@@ -33,10 +33,15 @@ def main():
 	print('---- Finding All Bookmarks & Files ----')
 	recursiveSearch(reducedList, saveToFolder, bookmarksDict)
 	filesPresent = folderSearch(saveToFolder)
+	
 	print('---- Reducing Bookmarks ----')
 	reducedBookmarksDict = reduceDictionary(bookmarksDict, filesPresent)
+	
 	print('---- Updating File Locations ----')
 	updatedBookmarksDict = movedBookmarks(reducedBookmarksDict, filesPresent)
+	
+	print('---- Deleting Old Files ----')
+
 
 	allNameStore = [] #used in check saved Bookmarks
 	triedShellCommands = [] #
@@ -88,12 +93,18 @@ def reduceDictionary(inBookmarks, inFiles):
 def movedBookmarks(inBookmarks, inFiles):
 	outBookmarks = dict(inBookmarks)
 	for key, entry in inBookmarks.items():
+		print('checking', entry)
 		testString = entry['fileName'] + '-full.png'
 		for key2, value in inFiles.items():
-			if testString == value:
-				destination = entry['folder']+'/'+entry['fileName'] +'-full.png'
+			destination = entry['folder']+'/'+entry['fileName'] +'-full.png'
+			if (testString == value and key2 != destination):
+				print('\n\n', key2, '\n', destination)
+				print('against', key2, '-', value)
+				if not os.path.isdir(entry['folder']):
+					os.mkdir(entry['folder'])
 				copy(key2, destination)
 				del outBookmarks[key]
+				break
 	return outBookmarks
 
 def saveSiteAsPicture(inLink, inFilename,inTriedShellCommands):
@@ -161,6 +172,7 @@ def loopAndSaveBookmarks(inBookmarkDict, outAllStore , outAttemptedStore, outAtt
 
 		if entry['URL'] in urlList:
 			try:
+				#TODO: add creation of folder and test here, to match the movedBookmarks function ----------------
 				copy(urlList[entry['URL']], folderPath)
 			except:
 				outAttemptedStore.append(entry)
