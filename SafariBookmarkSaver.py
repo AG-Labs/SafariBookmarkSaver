@@ -5,6 +5,8 @@ import os
 import re
 from shutil import copy
 import argparse
+import time
+import sys
 
 global idKey
 idKey = 0
@@ -49,7 +51,7 @@ def main(inSource, inDestination, isVerbose):
 	print('---- Updating File Locations ----')
 	updatedBookmarksDict = movedBookmarks(reducedBookmarksDict, filesPresent)
 	
-	print('---- Deleting Old Files ----')
+	print('\n---- Deleting Old Files ----')
 	filesPresent = folderSearch(saveToFolder)
 	identifyDeletedBookmarks(bookmarksDict, filesPresent)
 
@@ -59,7 +61,7 @@ def main(inSource, inDestination, isVerbose):
 	triedNameStore = [] #
 	loopAndSaveBookmarks(updatedBookmarksDict, allNameStore, triedNameStore, triedShellCommands)
 
-	print('---- Finishing ----')
+	print('\n---- Finishing ----')
 	failedNameStore = [] # used in check saved Bookmarks
 	succeededNameStore = [] # used in check saved Bookmarks
 	checkSavedBookmarks(allNameStore, succeededNameStore, failedNameStore)
@@ -108,7 +110,8 @@ def movedBookmarks(inBookmarks, inFiles):
 	#if a missing bookmark exists in a different folder, copy it to destination location
 	outBookmarks = dict(inBookmarks)
 	for key, entry in inBookmarks.items():
-		print('Attempting to find bookmark {} in existing Files'.format(tracker))
+		sys.stdout.write('\rAttempting to find bookmark {} in existing Files'.format(tracker))
+		sys.stdout.flush()
 		testString = entry['fileName'] + '-full.png'
 		for key2, value in inFiles.items():
 			destination = entry['folder']+'/'+entry['fileName'] +'-full.png'
@@ -122,6 +125,7 @@ def movedBookmarks(inBookmarks, inFiles):
 				del outBookmarks[key]
 				break
 		tracker += 1
+		time.sleep(0.1)
 	return outBookmarks
 
 def identifyDeletedBookmarks(inBookmarks, inFiles):
@@ -193,8 +197,10 @@ def checkSavedBookmarks(inAttempts, outSucceed, outFailed):
 def loopAndSaveBookmarks(inBookmarkDict, outAllStore , outAttemptedStore, outAttemptedArgs ):
 	urlList = {}
 	tracker = 1
+	total = len(inBookmarkDict)
 	for key, entry in inBookmarkDict.items():
-		print('Attempting to save bookmark {}'.format(tracker))
+		sys.stdout.write('\rAttempting to save bookmark {} of {}'.format(tracker,total))
+		sys.stdout.flush()
 		#Remove unsafe characters from web titles and create a full file path and
 		#append to to storage dictionary checkers
 		folderPath = entry['folder']
