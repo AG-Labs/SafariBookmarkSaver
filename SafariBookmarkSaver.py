@@ -4,38 +4,47 @@ import subprocess
 import os
 import re
 from shutil import copy
+import argparse
 
 global idKey
 idKey = 0
 global breakerCount
 breakerCount = 0
 
-def main():
+def main(inSource, inDestination, isVerbose):
+	outputTypeFull = isVerbose
+
 	bookmarksPathShort = '~/Library/Safari/Bookmarks.plist'
 	bookmarksPath = os.path.expanduser(bookmarksPathShort)
-	#Path to folder to save png's to
-	saveToFolderShort = '~/Desktop/Food Save'
-	saveToFolder = os.path.expanduser(saveToFolderShort)
+	saveToFolder =os.path.expanduser(inDestination)
+
+	if not os.path.isdir(os.path.dirname(saveToFolder)):
+		print('The folder',os.path.dirname(saveToFolder),'does not exist, please check destination')
+		quit()
+
 	global idKey
 	global breakerCount
-
-	#Enter title of bookmark folder you wish to save here
-	reducedTitle = 'Cooking' 
 
 	with open(bookmarksPath, 'rb') as fp:
 	    pl = plistlib.load(fp)
 	    fullBookmarksMenu = [item for item in pl['Children'] if 'Title' in item 
 	    and item['Title'] == 'BookmarksMenu'][0]
 	    bookmarksMenu = fullBookmarksMenu['Children']
-	    reducedList = [item for item in bookmarksMenu if 'Title' in item and item['Title'] == reducedTitle]
+	    reducedList = [item for item in bookmarksMenu if 'Title' in item and item['Title'] == inSource]
+
+	if len(reducedList) == 0:
+		print('The selected folder is empty or does not exists please check source')
+		quit()
 
 	bookmarksDict = {}
 	print('---- Finding All Bookmarks & Files ----')
 	recursiveSearch(reducedList, saveToFolder, bookmarksDict)
 	filesPresent = folderSearch(saveToFolder)
+	print(len(bookmarksDict),'Bookmarks found.')
 	
 	print('---- Reducing Bookmarks ----')
 	reducedBookmarksDict = reduceDictionary(bookmarksDict, filesPresent)
+	print(len(reducedBookmarksDict), 'Bookmarks to save.')
 	
 	print('---- Updating File Locations ----')
 	updatedBookmarksDict = movedBookmarks(reducedBookmarksDict, filesPresent)
@@ -54,7 +63,7 @@ def main():
 	failedNameStore = [] # used in check saved Bookmarks
 	succeededNameStore = [] # used in check saved Bookmarks
 	checkSavedBookmarks(allNameStore, succeededNameStore, failedNameStore)
-	writeTesterToFil(allNameStore, triedShellCommands, failedNameStore, succeededNameStore, triedNameStore)
+	writeTesterToFil(allNameStore, triedShellCommands, failedNameStore, succeededNameStore, triedNameStore, outputTypeFull)
 
 def recursiveSearch(inDict, inString, outDict):
 	#recursively search trhough plist data, if a child exists the entry is a folder and must be searched
@@ -94,10 +103,12 @@ def reduceDictionary(inBookmarks, inFiles):
 	return outBookmarks
 
 def movedBookmarks(inBookmarks, inFiles):
+	tracker = 1
 	#check dictionary of bookmarks against destination files
 	#if a missing bookmark exists in a different folder, copy it to destination location
 	outBookmarks = dict(inBookmarks)
 	for key, entry in inBookmarks.items():
+		print('Attempting to find bookmark {} in existing Files'.format(tracker))
 		testString = entry['fileName'] + '-full.png'
 		for key2, value in inFiles.items():
 			destination = entry['folder']+'/'+entry['fileName'] +'-full.png'
@@ -110,6 +121,7 @@ def movedBookmarks(inBookmarks, inFiles):
 				copy(key2, destination)
 				del outBookmarks[key]
 				break
+		tracker += 1
 	return outBookmarks
 
 def identifyDeletedBookmarks(inBookmarks, inFiles):
@@ -136,36 +148,38 @@ def saveSiteAsPicture(inLink, inFilename,inTriedShellCommands):
 	else:
 		argstring = "webkit2png " + ignoreSSL + link + width + "--delay=15 " +imSize + filename
 	inTriedShellCommands.append(argstring)
-	subprocess.run(argstring, shell=True, stdout=subprocess.DEVNULL)
+	subprocess.run(argstring, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-def writeTesterToFil(inTried, inArgs, inFailed, inSucceed, inATried):
+def writeTesterToFil(inTried, inArgs, inFailed, inSucceed, inATried, inOutputType):
 	#save outputs to txt files for easier checking
-	a = "bookmarks Tried.txt"
-	b = "shellargs.txt"
-	c = "bookmarks failed.txt"
+	a = "All Bookmarks.txt"
+	b = "Shellargs.txt"
+	c = "Bookmarks Failed.txt"
 	d = "bookmarks Succeeded.txt"
-	e = "bookmarks actually tried.txt"
-	with open(a, mode = 'wt' ) as myFile:
-		for entry in inTried:
-			myFile.write(str(entry))
-			myFile.write('\n')
+	e = "Tried Bookmarks.txt"
+	if inOutputType:
+		with open(a, mode = 'wt' ) as myFile:
+			for entry in inTried:
+				#myFile.write(str(entry['fileName']))
+				myFile.write(str(entry))
+				myFile.write('\n')
+		with open(d, mode = 'wt' ) as myFile:
+			for entry in inSucceed:
+				myFile.write(str(entry))
+				myFile.write('\n')
+		with open(e, mode = 'wt' ) as myFile:
+			for entry in inATried:
+				myFile.write(str(entry))
+				myFile.write('\n')
+		with open(b, mode = 'wt') as myFile:
+			print("\n\n")
+			for entry in inArgs:
+				entry = entry.replace(u'\xa0', u' ')
+				myFile.write(entry)
+				myFile.write('\n')
 	with open(c, mode = 'wt' ) as myFile:
 		for entry in inFailed:
 			myFile.write(str(entry))
-			myFile.write('\n')
-	with open(d, mode = 'wt' ) as myFile:
-		for entry in inSucceed:
-			myFile.write(str(entry))
-			myFile.write('\n')
-	with open(e, mode = 'wt' ) as myFile:
-		for entry in inATried:
-			myFile.write(str(entry))
-			myFile.write('\n')
-	with open(b, mode = 'wt') as myFile:
-		print("\n\n")
-		for entry in inArgs:
-			entry = entry.replace(u'\xa0', u' ')
-			myFile.write(entry)
 			myFile.write('\n')
 
 def checkSavedBookmarks(inAttempts, outSucceed, outFailed):
@@ -178,7 +192,9 @@ def checkSavedBookmarks(inAttempts, outSucceed, outFailed):
 
 def loopAndSaveBookmarks(inBookmarkDict, outAllStore , outAttemptedStore, outAttemptedArgs ):
 	urlList = {}
+	tracker = 1
 	for key, entry in inBookmarkDict.items():
+		print('Attempting to save bookmark {}'.format(tracker))
 		#Remove unsafe characters from web titles and create a full file path and
 		#append to to storage dictionary checkers
 		folderPath = entry['folder']
@@ -225,6 +241,33 @@ def loopAndSaveBookmarks(inBookmarkDict, outAllStore , outAttemptedStore, outAtt
 				except:
 					#logg HTTP error if needed
 					pass
+		tracker += 1
 
 if __name__ == '__main__':
-	main()
+
+	parser = argparse.ArgumentParser(description='Save Safari Bookmarks.')
+	parser.add_argument("-v","--verbose", help="Store all descriptor files - default false results in only a description of failed files",action="store_true")
+	parser.add_argument("-d", "--destination", type=str, help="Location to save output files. Please provide only from after the /Users/aUser folder")
+	parser.add_argument("-s", "--source", type=str, help="Subfolder of bookmarks to save")
+	args = parser.parse_args()
+	# add a ~/ to the front if required
+	destination = args.destination
+	source = args.source
+	
+	if destination:
+		if destination[0] != '~':
+			if destination[0] != '/':
+				destination = '~/' + destination
+			elif destination[0] == '/':
+				destination = '~' + destination
+	else:
+		#Enter title of destination folder you wish to save here if not using CLI
+		destination = '~/Desktop/Food Save'
+
+	if source:
+		pass
+	else:
+		#Enter title of bookmark folder you wish to save here if not using CLI
+		source = 'Cooking'
+
+	main(source, destination, args.verbose)
