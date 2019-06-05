@@ -7,6 +7,7 @@ from shutil import copy
 import argparse
 import time
 import sys
+import json
 
 global idKey
 idKey = 0
@@ -38,6 +39,12 @@ def main(inSource, inDestination, isVerbose):
 		print('The selected folder is empty or does not exists please check source')
 		quit()
 
+	JSONDict = {}
+	finalJSON = getJSON(reducedList, JSONDict)
+	with open('output.json','w+') as f:
+		json.dump(finalJSON,f, indent=2, separators=(',', ': '))
+
+
 	bookmarksDict = {}
 	print('---- Finding All Bookmarks & Files ----')
 	recursiveSearch(reducedList, saveToFolder, bookmarksDict)
@@ -68,7 +75,7 @@ def main(inSource, inDestination, isVerbose):
 	writeTesterToFil(allNameStore, triedShellCommands, failedNameStore, succeededNameStore, triedNameStore, outputTypeFull)
 
 def recursiveSearch(inDict, inString, outDict):
-	#recursively search trhough plist data, if a child exists the entry is a folder and must be searched
+	#recursively search through plist data, if a child exists the entry is a folder and must be searched
 	#if a child does not exist store the entry
 	global idKey
 	for aChild in inDict:
@@ -84,6 +91,23 @@ def recursiveSearch(inDict, inString, outDict):
 				tempEntry = {'folder': inString, 'fileName': fileName,'URL': reducedURLString}
 				outDict[idKey] = tempEntry
 				idKey = idKey + 1
+
+def getJSON(inDict, inJSON):
+
+	for aChild in inDict:
+		if 'Children' in aChild:
+			tempString = aChild['Title']
+			inJSON.setdefault(tempString, []).append(getJSON(aChild['Children'], {}))
+
+		else:
+			# remove everything from url after the query string 
+			if 'URLString' in aChild:
+				reducedURLString = re.sub('\?.*$', '', aChild['URLString'])
+				fileName = re.sub('[^A-Za-z0-9/\s]+', '', aChild['URIDictionary']['title'])
+				inJSON[fileName] = {'url':reducedURLString,'notes':''}
+
+	return(inJSON)
+
 
 def folderSearch(inRoot):
 	#return dictionary of file/folder structure for the destination folder
@@ -268,7 +292,7 @@ if __name__ == '__main__':
 				destination = '~' + destination
 	else:
 		#Enter title of destination folder you wish to save here if not using CLI
-		destination = '~/Desktop/Food Save'
+		destination = '~/OneDrive/Food Save'
 
 	if source:
 		pass
