@@ -14,7 +14,7 @@ idKey = 0
 global breakerCount
 breakerCount = 0
 
-def main(inSource, inDestination, isVerbose):
+def main(inSource, inDestination, isVerbose, saveJSONFlag):
 	outputTypeFull = isVerbose
 
 	bookmarksPathShort = '~/Library/Safari/Bookmarks.plist'
@@ -39,40 +39,41 @@ def main(inSource, inDestination, isVerbose):
 		print('The selected folder is empty or does not exists please check source')
 		quit()
 
-	JSONDict = {}
-	finalJSON = getJSON(reducedList, JSONDict)
-	with open('output.json','w+') as f:
-		json.dump(finalJSON,f, indent=2, separators=(',', ': '))
+	if saveJSONFlag:
+		JSONDict = {}
+		finalJSON = getJSON(reducedList, JSONDict)
+		with open('output.json','w+') as f:
+			json.dump(finalJSON,f, indent=2, separators=(',', ': '))
 
+	else:
+		bookmarksDict = {}
+		print('---- Finding All Bookmarks & Files ----')
+		recursiveSearch(reducedList, saveToFolder, bookmarksDict)
+		filesPresent = folderSearch(saveToFolder)
+		print(len(bookmarksDict),'Bookmarks found.')
+		
+		print('---- Reducing Bookmarks ----')
+		reducedBookmarksDict = reduceDictionary(bookmarksDict, filesPresent)
+		print(len(reducedBookmarksDict), 'Bookmarks to save.')
+		
+		print('---- Updating File Locations ----')
+		updatedBookmarksDict = movedBookmarks(reducedBookmarksDict, filesPresent)
+		
+		print('\n---- Deleting Old Files ----')
+		filesPresent = folderSearch(saveToFolder)
+		identifyDeletedBookmarks(bookmarksDict, filesPresent)
 
-	bookmarksDict = {}
-	print('---- Finding All Bookmarks & Files ----')
-	recursiveSearch(reducedList, saveToFolder, bookmarksDict)
-	filesPresent = folderSearch(saveToFolder)
-	print(len(bookmarksDict),'Bookmarks found.')
-	
-	print('---- Reducing Bookmarks ----')
-	reducedBookmarksDict = reduceDictionary(bookmarksDict, filesPresent)
-	print(len(reducedBookmarksDict), 'Bookmarks to save.')
-	
-	print('---- Updating File Locations ----')
-	updatedBookmarksDict = movedBookmarks(reducedBookmarksDict, filesPresent)
-	
-	print('\n---- Deleting Old Files ----')
-	filesPresent = folderSearch(saveToFolder)
-	identifyDeletedBookmarks(bookmarksDict, filesPresent)
+		print('---- Saving New Bookmarks ----')
+		allNameStore = [] #used in check saved Bookmarks
+		triedShellCommands = [] #
+		triedNameStore = [] #
+		loopAndSaveBookmarks(updatedBookmarksDict, allNameStore, triedNameStore, triedShellCommands)
 
-	print('---- Saving New Bookmarks ----')
-	allNameStore = [] #used in check saved Bookmarks
-	triedShellCommands = [] #
-	triedNameStore = [] #
-	loopAndSaveBookmarks(updatedBookmarksDict, allNameStore, triedNameStore, triedShellCommands)
-
-	print('\n---- Finishing ----')
-	failedNameStore = [] # used in check saved Bookmarks
-	succeededNameStore = [] # used in check saved Bookmarks
-	checkSavedBookmarks(allNameStore, succeededNameStore, failedNameStore)
-	writeTesterToFil(allNameStore, triedShellCommands, failedNameStore, succeededNameStore, triedNameStore, outputTypeFull)
+		print('\n---- Finishing ----')
+		failedNameStore = [] # used in check saved Bookmarks
+		succeededNameStore = [] # used in check saved Bookmarks
+		checkSavedBookmarks(allNameStore, succeededNameStore, failedNameStore)
+		writeTesterToFil(allNameStore, triedShellCommands, failedNameStore, succeededNameStore, triedNameStore, outputTypeFull)
 
 def recursiveSearch(inDict, inString, outDict):
 	#recursively search through plist data, if a child exists the entry is a folder and must be searched
@@ -279,6 +280,8 @@ if __name__ == '__main__':
 	parser.add_argument("-v","--verbose", help="Store all descriptor files - default false results in only a description of failed files",action="store_true")
 	parser.add_argument("-d", "--destination", type=str, help="Location to save output files. Please provide only from after the /Users/aUser folder")
 	parser.add_argument("-s", "--source", type=str, help="Subfolder of bookmarks to save")
+	parser.add_argument("-j","--json", help="Store only JSON store of files - default false",action="store_true")
+
 	args = parser.parse_args()
 	# add a ~/ to the front if required
 	destination = args.destination
@@ -300,4 +303,4 @@ if __name__ == '__main__':
 		#Enter title of bookmark folder you wish to save here if not using CLI
 		source = 'Cooking'
 
-	main(source, destination, args.verbose)
+	main(source, destination, args.verbose, args.json)
