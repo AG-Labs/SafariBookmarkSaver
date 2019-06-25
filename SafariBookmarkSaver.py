@@ -98,15 +98,14 @@ def getJSON(inDict, inJSON):
 	for aChild in inDict:
 		if 'Children' in aChild:
 			tempString = aChild['Title']
-			#inJSON.setdefault(tempString, []).append(getJSON(aChild['Children'], {}))
-			inJSON.append({'name':tempString, 'children':getJSON(aChild['Children'], [])})
+			inJSON.append({'name':tempString, 'children':getJSON(aChild['Children'], []), 'active': False, 'toggled': False})
 
 		else:
 			# remove everything from url after the query string 
 			if 'URLString' in aChild:
 				reducedURLString = re.sub('\?.*$', '', aChild['URLString'])
 				fileName = re.sub('[^A-Za-z0-9/\s]+', '', aChild['URIDictionary']['title'])
-				inJSON.append({'name':fileName,'url':reducedURLString,'notes':''})
+				inJSON.append({'name':fileName,'url':reducedURLString,'notes':'', 'active': False, 'toggled': True})
 
 	return(inJSON)
 
