@@ -1,4 +1,5 @@
 from urllib.request import Request, urlopen
+from functools import cmp_to_key
 import plistlib
 import subprocess
 import os
@@ -40,10 +41,12 @@ def main(inSource, inDestination, isVerbose, saveJSONFlag):
 		quit()
 
 	if saveJSONFlag:
+		sortFunc_py3 = cmp_to_key(sortFunc)
 		JSONDict = []
 		finalJSON = getJSON(reducedList, JSONDict)
+		sortedJSON = sorted(finalJSON[0]['children'],key = sortFunc_py3)
 		with open('foodData.json','w+') as f:
-			json.dump(finalJSON,f, indent=2, separators=(',', ': '))
+			json.dump(sortedJSON,f, indent=2, separators=(',', ': '))
 
 	else:
 		bookmarksDict = {}
@@ -109,6 +112,25 @@ def getJSON(inDict, inJSON):
 
 	return(inJSON)
 
+def sortFunc(input1, input2):
+	if 'children' in input1 and 'children' in input2:
+		if input1['name'].lower() > input2['name'].lower():
+			return 1 
+		elif input1['name'].lower() == input2['name'].lower():
+			return 0 
+		else:
+			return -1
+	elif 'children' in input1:
+		return -1
+	elif 'children' in input2:
+		return 1
+	else:
+		if input1['name'].lower() > input2['name'].lower():
+			return 1 
+		elif input1['name'].lower() == input2['name'].lower():
+			return 0 
+		else:
+			return -1
 
 def folderSearch(inRoot):
 	#return dictionary of file/folder structure for the destination folder
