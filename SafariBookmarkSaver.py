@@ -41,10 +41,9 @@ def main(inSource, inDestination, isVerbose, saveJSONFlag):
 		quit()
 
 	if saveJSONFlag:
-		sortFunc_py3 = cmp_to_key(sortFunc)
 		JSONDict = []
 		finalJSON = getJSON(reducedList, JSONDict)
-		sortedJSON = sorted(finalJSON[0]['children'],key = sortFunc_py3)
+		sortedJSON = sortOutput(finalJSON[0]['children'])
 		with open('foodData.json','w+') as f:
 			json.dump(sortedJSON,f, indent=2, separators=(',', ': '))
 
@@ -111,6 +110,15 @@ def getJSON(inDict, inJSON):
 				inJSON.append({'name':fileName,'url':reducedURLString,'notes':'', 'active': False, 'toggled': True})
 
 	return(inJSON)
+
+def sortOutput(inJSON):
+	sortFunc_py3 = cmp_to_key(sortFunc)
+	sortedLevel = sorted(inJSON,key = sortFunc_py3)
+	for index, item in enumerate(sortedLevel):		
+		if 'children' in item:
+			result = sortOutput(item['children'])
+			sortedLevel[index]['children'] = result
+	return sortedLevel
 
 def sortFunc(input1, input2):
 	if 'children' in input1 and 'children' in input2:
