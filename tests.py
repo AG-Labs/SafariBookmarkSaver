@@ -23,12 +23,17 @@ class TestMethods(unittest.TestCase):
         json_ised_data = SafariBookmarkSaver.getJSON(testData.bookmarkData,JSONDict)
         self.assertEqual(json_ised_data, testData.bookmarkAsJson)
 
+
+    def test_recursive_search(self):
+        outDict={}
+        SafariBookmarkSaver.recursiveSearch(testData.bookmarkData, 'tempString', outDict)
+        self.assertEqual(outDict, testData.recursiveSearched)
+
+
 if __name__ == '__main__':
     unittest.main()
 
-
-    # recursiveSearch
-    #folderSearch
+    #folderSearch       -   requires os
     #reduceDictionary
     #movedBookmarks
     #identifyDeletedBookmarks
