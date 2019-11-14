@@ -18,6 +18,21 @@ class TestMethods(unittest.TestCase):
         sortedOutput = SafariBookmarkSaver.sortOutput(testData.unsortedData)
         self.assertEqual(sortedOutput, testData.sortedData)
 
+    def test_get_json(self):
+        JSONDict = []
+        json_ised_data = SafariBookmarkSaver.getJSON(testData.bookmarkData,JSONDict)
+        self.assertEqual(json_ised_data, testData.bookmarkAsJson)
 
 if __name__ == '__main__':
     unittest.main()
+
+
+    # recursiveSearch
+    #folderSearch
+    #reduceDictionary
+    #movedBookmarks
+    #identifyDeletedBookmarks
+    #saveSiteAsPicture
+    #writeTesterToFil
+    #checkSavedBookmarks
+    #loopAndSaveBookmarks
