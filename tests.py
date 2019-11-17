@@ -15,19 +15,19 @@ class TestMethods(unittest.TestCase):
         self.assertEqual(result3, 0)
 
     def test_full_sort(self):
-        sortedOutput = SafariBookmarkSaver.sortOutput(testData.unsortedData)
-        self.assertEqual(sortedOutput, testData.sortedData)
+        sorted_output = SafariBookmarkSaver.sortOutput(testData.unsortedData)
+        self.assertEqual(sorted_output, testData.sortedData)
 
     def test_get_json(self):
-        JSONDict = []
-        json_ised_data = SafariBookmarkSaver.getJSON(testData.bookmarkData,JSONDict)
+        json_dict = []
+        json_ised_data = SafariBookmarkSaver.getJSON(testData.bookmarkData,json_dict)
         self.assertEqual(json_ised_data, testData.bookmarkAsJson)
 
 
     def test_recursive_search(self):
-        outDict={}
-        SafariBookmarkSaver.recursiveSearch(testData.bookmarkData, 'tempString', outDict)
-        self.assertEqual(outDict, testData.recursiveSearched)
+        out_dict={}
+        SafariBookmarkSaver.recursiveSearch(testData.bookmarkData, 'tempString', out_dict)
+        self.assertEqual(out_dict, testData.recursiveSearched)
 
 
 if __name__ == '__main__':
