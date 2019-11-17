@@ -98,7 +98,7 @@ class BookmarkSaverThread(QThread):
 		self.wait()
 	
 	def run(self):
-		loopBookmarksRefac.main(self.source, self.destination, False)
+		SafariBookmarkSaver.main(self.source, self.destination, False, False)
 
 def get_all_bookmarks(bookmarks_path):
 	with open(bookmarks_path, 'rb') as fp:
