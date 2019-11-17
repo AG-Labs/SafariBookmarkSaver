@@ -42,49 +42,49 @@ def main(in_source, in_destination, is_verbose, save_json_flag):
 
 	if save_json_flag:
 		json_dict = []
-		final_json = getJSON(reduced_list, json_dict)
-		sorted_json = sortOutput(final_json[0]['children'])
+		final_json = get_json(reduced_list, json_dict)
+		sorted_json = sort_output(final_json[0]['children'])
 		with open('foodData.json','w+') as f:
 			json.dump(sorted_json,f, indent=2, separators=(',', ': '))
 
 	else:
 		bookmarks_dict = {}
 		print('---- Finding All Bookmarks & Files ----')
-		recursiveSearch(reduced_list, save_to_folder, bookmarks_dict)
-		files_present = folderSearch(save_to_folder)
+		recursive_search(reduced_list, save_to_folder, bookmarks_dict)
+		files_present = folder_search(save_to_folder)
 		print(len(bookmarks_dict),'Bookmarks found.')
 		
 		print('---- Reducing Bookmarks ----')
-		reduced_bookmarks_dict = reduceDictionary(bookmarks_dict, files_present)
+		reduced_bookmarks_dict = reduce_dictionary(bookmarks_dict, files_present)
 		print(len(reduced_bookmarks_dict), 'Bookmarks to save.')
 		
 		print('---- Updating File Locations ----')
-		updated_bookmarks_dict = movedBookmarks(reduced_bookmarks_dict, files_present)
+		updated_bookmarks_dict = moved_bookmarks(reduced_bookmarks_dict, files_present)
 		
 		print('\n---- Deleting Old Files ----')
-		files_present = folderSearch(save_to_folder)
-		identifyDeletedBookmarks(bookmarks_dict, files_present)
+		files_present = folder_search(save_to_folder)
+		identify_deleted_bookmarks(bookmarks_dict, files_present)
 
 		print('---- Saving New Bookmarks ----')
 		all_name_store = [] #used in check saved Bookmarks
 		tried_shell_commands = [] #
 		tried_name_store = [] #
-		loopAndSaveBookmarks(updated_bookmarks_dict, all_name_store, tried_name_store, tried_shell_commands)
+		loop_and_save_bookmarks(updated_bookmarks_dict, all_name_store, tried_name_store, tried_shell_commands)
 
 		print('\n---- Finishing ----')
 		failed_name_store = [] # used in check saved Bookmarks
 		succeeded_name_store = [] # used in check saved Bookmarks
-		checkSavedBookmarks(all_name_store, succeeded_name_store, failed_name_store)
-		writeTesterToFil(all_name_store, tried_shell_commands, failed_name_store, succeeded_name_store, tried_name_store, output_type_full)
+		check_saved_bookmarks(all_name_store, succeeded_name_store, failed_name_store)
+		write_tester_to_file(all_name_store, tried_shell_commands, failed_name_store, succeeded_name_store, tried_name_store, output_type_full)
 
-def recursiveSearch(in_dict, in_string, out_dict):
+def recursive_search(in_dict, in_string, out_dict):
 	#recursively search through plist data, if a child exists the entry is a folder and must be searched
 	#if a child does not exist store the entry
 	global idKey
 	for a_child in in_dict:
 		if 'Children' in a_child:
 			temp_string = in_string + '/' + a_child['Title']
-			recursiveSearch(a_child['Children'], temp_string, out_dict)
+			recursive_search(a_child['Children'], temp_string, out_dict)
 		else:
 			# remove everything from url after the query string 
 			if 'URLString' in a_child:
@@ -95,12 +95,12 @@ def recursiveSearch(in_dict, in_string, out_dict):
 				out_dict[idKey] = temp_entry
 				idKey = idKey + 1
 
-def getJSON(in_dict, in_json):
+def get_json(in_dict, in_json):
 
 	for a_child in in_dict:
 		if 'Children' in a_child:
 			temp_string = a_child['Title']
-			in_json.append({'name':temp_string, 'children':getJSON(a_child['Children'], []), 'active': False, 'toggled': False})
+			in_json.append({'name':temp_string, 'children':get_json(a_child['Children'], []), 'active': False, 'toggled': False})
 
 		else:
 			# remove everything from url after the query string 
@@ -111,16 +111,16 @@ def getJSON(in_dict, in_json):
 
 	return(in_json)
 
-def sortOutput(in_json):
-	sort_func_py3 = cmp_to_key(sortFunc)
+def sort_output(in_json):
+	sort_func_py3 = cmp_to_key(sort_func)
 	sorted_level = sorted(in_json,key = sort_func_py3)
 	for index, item in enumerate(sorted_level):		
 		if 'children' in item:
-			result = sortOutput(item['children'])
+			result = sort_output(item['children'])
 			sorted_level[index]['children'] = result
 	return sorted_level
 
-def sortFunc(input1, input2):
+def sort_func(input1, input2):
 	if 'children' in input1 and 'children' in input2:
 		if input1['name'].lower() > input2['name'].lower():
 			return 1 
@@ -140,7 +140,7 @@ def sortFunc(input1, input2):
 		else:
 			return -1
 
-def folderSearch(in_root):
+def folder_search(in_root):
 	#return dictionary of file/folder structure for the destination folder
 	identified_files = {}
 	for root, _, files in os.walk(in_root, topdown=False):
@@ -149,7 +149,7 @@ def folderSearch(in_root):
 				identified_files[os.path.join(root, name)] = name
 	return identified_files
 
-def reduceDictionary(in_bookmarks, in_files):
+def reduce_dictionary(in_bookmarks, in_files):
 	#compare dictionary of bookmarks to dictionary of destination files
 	#return dictionary of bookmarks which do not exist in the destination
 	out_bookmarks = dict(in_bookmarks)
@@ -159,7 +159,7 @@ def reduceDictionary(in_bookmarks, in_files):
 			del out_bookmarks[key]
 	return out_bookmarks
 
-def movedBookmarks(in_bookmarks, in_files):
+def moved_bookmarks(in_bookmarks, in_files):
 	tracker = 1
 	#check dictionary of bookmarks against destination files
 	#if a missing bookmark exists in a different folder, copy it to destination location
@@ -183,7 +183,7 @@ def movedBookmarks(in_bookmarks, in_files):
 		time.sleep(0.1)
 	return out_bookmarks
 
-def identifyDeletedBookmarks(in_bookmarks, in_files):
+def identify_deleted_bookmarks(in_bookmarks, in_files):
 	#compare all current files against all current bookmarks, if present in files and not
 	#bookmarks delete file at that path
 	for key, entry in in_files.items():
@@ -195,7 +195,7 @@ def identifyDeletedBookmarks(in_bookmarks, in_files):
 		if present_flag == 0:
 			os.remove(key)
 
-def saveSiteAsPicture(in_link, in_filename,in_tried_shell_commands):
+def save_site_as_picture(in_link, in_filename,in_tried_shell_commands):
 	#take file name path and link and add arguments to shell commands pointer
 	link = in_link + " "
 	width = "--width=1280 "
@@ -209,7 +209,7 @@ def saveSiteAsPicture(in_link, in_filename,in_tried_shell_commands):
 	in_tried_shell_commands.append(argstring)
 	subprocess.run(argstring, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-def writeTesterToFil(in_tried, in_args, in_failed, in_succeed, in_a_tried, in_output_type):
+def write_tester_to_file(in_tried, in_args, in_failed, in_succeed, in_a_tried, in_output_type):
 	#save outputs to txt files for easier checking
 	a = "All Bookmarks.txt"
 	b = "Shellargs.txt"
@@ -241,7 +241,7 @@ def writeTesterToFil(in_tried, in_args, in_failed, in_succeed, in_a_tried, in_ou
 			myFile.write(str(entry))
 			myFile.write('\n')
 
-def checkSavedBookmarks(in_attempts, out_succeed, out_failed):
+def check_saved_bookmarks(in_attempts, out_succeed, out_failed):
 	#Loop through attemped bookmarks and check for file existence, return succeeded and failed
 	for entry in in_attempts:
 		if os.path.isfile(entry["file_name"]+"-full.png"):
@@ -249,7 +249,7 @@ def checkSavedBookmarks(in_attempts, out_succeed, out_failed):
 		else:
 			out_failed.append(entry)
 
-def loopAndSaveBookmarks(in_bookmark_dict, out_all_store , out_attempted_store, out_attempted_args ):
+def loop_and_save_bookmarks(in_bookmark_dict, out_all_store , out_attempted_store, out_attempted_args ):
 	url_list = {}
 	tracker = 1
 	total = len(in_bookmark_dict)
@@ -274,7 +274,7 @@ def loopAndSaveBookmarks(in_bookmark_dict, out_all_store , out_attempted_store, 
 				req = Request(entry['URL'], headers={'User-Agent': 'Mozilla/5.0'})
 				try:
 					request_code = urlopen(req).getcode()
-					saveSiteAsPicture(entry['URL'], full_string,out_attempted_args)
+					save_site_as_picture(entry['URL'], full_string,out_attempted_args)
 				except:
 					pass
 		else:
@@ -286,7 +286,7 @@ def loopAndSaveBookmarks(in_bookmark_dict, out_all_store , out_attempted_store, 
 				req = Request(entry['URL'], headers={'User-Agent': 'Mozilla/5.0'})
 				try:
 					request_code = urlopen(req).getcode()
-					saveSiteAsPicture(entry['URL'], full_string,out_attempted_args)
+					save_site_as_picture(entry['URL'], full_string,out_attempted_args)
 					url_list[entry['URL']] = full_file_path
 				except:
 					#logg HTTP error if needed
@@ -297,7 +297,7 @@ def loopAndSaveBookmarks(in_bookmark_dict, out_all_store , out_attempted_store, 
 				req = Request(entry['URL'], headers={'User-Agent': 'Mozilla/5.0'})
 				try:
 					request_code = urlopen(req).getcode()
-					saveSiteAsPicture(entry['URL'], full_string,out_attempted_args)
+					save_site_as_picture(entry['URL'], full_string,out_attempted_args)
 					url_list[entry['URL']] = full_file_path
 				except:
 					#logg HTTP error if needed
