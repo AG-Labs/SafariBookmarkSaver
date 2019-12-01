@@ -274,7 +274,8 @@ def loop_and_save_bookmarks(in_bookmark_dict, out_all_store , out_attempted_stor
 				req = Request(entry['URL'], headers={'User-Agent': 'Mozilla/5.0'})
 				try:
 					request_code = urlopen(req).getcode()
-					save_site_as_picture(entry['URL'], full_string,out_attempted_args)
+					if request_code == 200:
+						save_site_as_picture(entry['URL'], full_string,out_attempted_args)
 				except:
 					pass
 		else:
@@ -286,8 +287,9 @@ def loop_and_save_bookmarks(in_bookmark_dict, out_all_store , out_attempted_stor
 				req = Request(entry['URL'], headers={'User-Agent': 'Mozilla/5.0'})
 				try:
 					request_code = urlopen(req).getcode()
-					save_site_as_picture(entry['URL'], full_string,out_attempted_args)
-					url_list[entry['URL']] = full_file_path
+					if request_code == 200:
+						save_site_as_picture(entry['URL'], full_string,out_attempted_args)
+						url_list[entry['URL']] = full_file_path
 				except:
 					#logg HTTP error if needed
 					pass
@@ -297,8 +299,9 @@ def loop_and_save_bookmarks(in_bookmark_dict, out_all_store , out_attempted_stor
 				req = Request(entry['URL'], headers={'User-Agent': 'Mozilla/5.0'})
 				try:
 					request_code = urlopen(req).getcode()
-					save_site_as_picture(entry['URL'], full_string,out_attempted_args)
-					url_list[entry['URL']] = full_file_path
+					if request_code == 200:
+						save_site_as_picture(entry['URL'], full_string,out_attempted_args)
+						url_list[entry['URL']] = full_file_path
 				except:
 					#logg HTTP error if needed
 					pass
