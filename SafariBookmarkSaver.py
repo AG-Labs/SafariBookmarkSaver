@@ -14,6 +14,7 @@ global idKey
 idKey = 0
 global breakerCount
 breakerCount = 0
+fileSuffix = '-full.png'
 
 def main(in_source, in_destination, is_verbose, save_json_flag):
 	output_type_full = is_verbose
@@ -121,7 +122,7 @@ def sort_output(in_json):
 	return sorted_level
 
 def sort_func(input1, input2):
-	if 'children' in input1 and 'children' in input2:
+	if ('children' in input1 and 'children' in input2) or ('children' not in input1 and 'children' not in input2) :
 		if input1['name'].lower() > input2['name'].lower():
 			return 1 
 		elif input1['name'].lower() == input2['name'].lower():
@@ -132,13 +133,6 @@ def sort_func(input1, input2):
 		return -1
 	elif 'children' in input2:
 		return 1
-	else:
-		if input1['name'].lower() > input2['name'].lower():
-			return 1 
-		elif input1['name'].lower() == input2['name'].lower():
-			return 0 
-		else:
-			return -1
 
 def folder_search(in_root):
 	#return dictionary of file/folder structure for the destination folder
@@ -167,9 +161,9 @@ def moved_bookmarks(in_bookmarks, in_files):
 	for key, entry in in_bookmarks.items():
 		sys.stdout.write('\rAttempting to find bookmark {} in existing Files'.format(tracker))
 		sys.stdout.flush()
-		test_string = entry['file_name'] + '-full.png'
+		test_string = entry['file_name'] + fileSuffix
 		for key2, value in in_files.items():
-			destination = entry['folder']+'/'+entry['file_name'] +'-full.png'
+			destination = entry['folder']+'/'+entry['file_name'] + fileSuffix
 			#check filename of missing against all other filenames
 			# if a match is found and it is not of the same location copy
 			#file and remove from dictionary of bookmarks
@@ -189,7 +183,7 @@ def identify_deleted_bookmarks(in_bookmarks, in_files):
 	for key, entry in in_files.items():
 		present_flag = 0
 		for key2, value in in_bookmarks.items():
-			test_string = value['folder']+'/'+value['file_name']+'-full.png'
+			test_string = value['folder']+'/'+value['file_name']+ fileSuffix
 			if key == test_string:
 				present_flag = 1
 		if present_flag == 0:
@@ -330,9 +324,7 @@ if __name__ == '__main__':
 		#Enter title of destination folder you wish to save here if not using CLI
 		destination = '~/OneDrive/Food Save'
 
-	if source:
-		pass
-	else:
+	if not source:
 		#Enter title of bookmark folder you wish to save here if not using CLI
 		source = 'Cooking'
 
