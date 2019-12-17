@@ -15,6 +15,7 @@ idKey = 0
 global breakerCount
 breakerCount = 0
 fileSuffix = '-full.png'
+userAgent = {'User-Agent': 'Mozilla/5.0'}
 
 def main(in_source, in_destination, is_verbose, save_json_flag):
 	output_type_full = is_verbose
@@ -265,7 +266,7 @@ def loop_and_save_bookmarks(in_bookmark_dict, out_all_store , out_attempted_stor
 				copy(url_list[entry['URL']], folder_path)
 			except:
 				out_attempted_store.append(entry)
-				req = Request(entry['URL'], headers={'User-Agent': 'Mozilla/5.0'})
+				req = Request(entry['URL'], headers=userAgent)
 				try:
 					request_code = urlopen(req).getcode()
 					if request_code == 200:
@@ -278,7 +279,7 @@ def loop_and_save_bookmarks(in_bookmark_dict, out_all_store , out_attempted_stor
 			#folder
 			if os.path.isdir(folder_path):
 				out_attempted_store.append(entry)
-				req = Request(entry['URL'], headers={'User-Agent': 'Mozilla/5.0'})
+				req = Request(entry['URL'], headers=userAgent)
 				try:
 					request_code = urlopen(req).getcode()
 					if request_code == 200:
@@ -290,7 +291,7 @@ def loop_and_save_bookmarks(in_bookmark_dict, out_all_store , out_attempted_stor
 			else:
 				os.makedirs(folder_path)
 				out_attempted_store.append(entry)
-				req = Request(entry['URL'], headers={'User-Agent': 'Mozilla/5.0'})
+				req = Request(entry['URL'], headers=userAgent)
 				try:
 					request_code = urlopen(req).getcode()
 					if request_code == 200:
