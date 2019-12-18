@@ -244,6 +244,17 @@ def check_saved_bookmarks(in_attempts, out_succeed, out_failed):
 		else:
 			out_failed.append(entry)
 
+def check_site_and_save(toSave, full_string, out_attempted_args, url_list, full_file_path,to_save):
+	req = Request(toSave, headers=userAgent)
+		try:
+			request_code = urlopen(req).getcode()
+			if request_code == 200:
+				save_site_as_picture(toSave, full_string,out_attempted_args)
+				if to_save:
+					url_list[entry['URL']] = full_file_path
+		except:
+			pass
+
 def loop_and_save_bookmarks(in_bookmark_dict, out_all_store , out_attempted_store, out_attempted_args ):
 	url_list = {}
 	tracker = 1
@@ -261,45 +272,23 @@ def loop_and_save_bookmarks(in_bookmark_dict, out_all_store , out_attempted_stor
 
 		if entry['URL'] in url_list:
 			try:
-				if not os.path.isdir(folder_path):
-					os.mkdir(folder_path)
+				#if not os.path.isdir(folder_path):
+				os.mkdir(folder_path)
 				copy(url_list[entry['URL']], folder_path)
 			except:
 				out_attempted_store.append(entry)
-				req = Request(entry['URL'], headers=userAgent)
-				try:
-					request_code = urlopen(req).getcode()
-					if request_code == 200:
-						save_site_as_picture(entry['URL'], full_string,out_attempted_args)
-				except:
-					pass
+				check_site_and_save(entry['URL'], full_string, out_attempted_args, url_list, full_file_path, False)
 		else:
 			full_file_path = full_string + "-full.png"
 			#check for existence of file and folder, pass if file already saved or create file and 
 			#folder
 			if os.path.isdir(folder_path):
 				out_attempted_store.append(entry)
-				req = Request(entry['URL'], headers=userAgent)
-				try:
-					request_code = urlopen(req).getcode()
-					if request_code == 200:
-						save_site_as_picture(entry['URL'], full_string,out_attempted_args)
-						url_list[entry['URL']] = full_file_path
-				except:
-					#logg HTTP error if needed
-					pass
+				check_site_and_save(entry['URL'], full_string, out_attempted_args, url_list, full_file_path, True)
 			else:
 				os.makedirs(folder_path)
 				out_attempted_store.append(entry)
-				req = Request(entry['URL'], headers=userAgent)
-				try:
-					request_code = urlopen(req).getcode()
-					if request_code == 200:
-						save_site_as_picture(entry['URL'], full_string,out_attempted_args)
-						url_list[entry['URL']] = full_file_path
-				except:
-					#logg HTTP error if needed
-					pass
+				check_site_and_save(entry['URL'], full_string, out_attempted_args, url_list, full_file_path, True)
 		tracker += 1
 
 if __name__ == '__main__':
