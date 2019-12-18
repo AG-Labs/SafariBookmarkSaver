@@ -272,7 +272,6 @@ def loop_and_save_bookmarks(in_bookmark_dict, out_all_store , out_attempted_stor
 
 		if entry['URL'] in url_list:
 			try:
-				#if not os.path.isdir(folder_path):
 				os.mkdir(folder_path)
 				copy(url_list[entry['URL']], folder_path)
 			except:
@@ -292,7 +291,6 @@ def loop_and_save_bookmarks(in_bookmark_dict, out_all_store , out_attempted_stor
 		tracker += 1
 
 if __name__ == '__main__':
-
 	parser = argparse.ArgumentParser(description='Save Safari Bookmarks.')
 	parser.add_argument("-v","--verbose", help="Store all descriptor files - default false results in only a description of failed files",action="store_true")
 	parser.add_argument("-d", "--destination", type=str, help="Location to save output files. Please provide only from after the /Users/aUser folder")
