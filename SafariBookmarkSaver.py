@@ -244,14 +244,14 @@ def check_saved_bookmarks(in_attempts, out_succeed, out_failed):
 		else:
 			out_failed.append(entry)
 
-def check_site_and_save(toSave, full_string, out_attempted_args, url_list, full_file_path,to_save):
-	req = Request(toSave, headers=userAgent)
+def check_site_and_save(entry, full_string, out_attempted_args, url_list, full_file_path,to_save):
+	req = Request(entry, headers=userAgent)
 	try:
 		request_code = urlopen(req).getcode()
 		if request_code == 200:
-			save_site_as_picture(toSave, full_string,out_attempted_args)
+			save_site_as_picture(entry, full_string,out_attempted_args)
 			if to_save:
-				url_list[entry['URL']] = full_file_path
+				url_list[entry] = full_file_path
 	except:
 		pass
 
