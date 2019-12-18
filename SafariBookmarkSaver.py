@@ -10,9 +10,7 @@ import time
 import sys
 import json
 
-global idKey
 idKey = 0
-global breakerCount
 breakerCount = 0
 fileSuffix = '-full.png'
 userAgent = {'User-Agent': 'Mozilla/5.0'}
