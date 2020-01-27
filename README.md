@@ -10,13 +10,18 @@ Whilst the main bulk of the code will run on any operating system the initial re
 
 If you have installed webkit2png through homebrew there is an error introduced in the update to .... where non-HTTPS sites are rejected and the ignore-ssl flag does not work. Follow [this](https://github.com/bendalton/webkit2png/commit/9a96ac8977c386a84edb674ca1518e90452cee88) link for simple instructions on how to correct this, further information is avaliable [here](https://github.com/paulhammond/webkit2png/issues/100). 
 
-### Running
+### Running GUI
 
 To run simply fill in, if desired a sub directory to start from in the reducedTitle variable and a destinatino folder for the png images which will be saved. 
 
 Once run the result will be an folder with a png for every bookmark and a single text file containing details of any bookmarks that could not be saved. 
 
 ![Example Folder](Example-Output.png)
+
+### Running CLI JSON Output
+
+To run in CLI mode outputting to json the -j flag must be added along with a destination
+for example `python SafariBookmarkSaver.py -j -d ./`
 
 ## Authors
 
