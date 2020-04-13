@@ -17,7 +17,7 @@ breakerCount = 0
 fileSuffix = '-full.png'
 userAgent = {'User-Agent': 'Mozilla/5.0'}
 
-def main(in_source, in_destination, is_verbose, save_json_flag, meal_selection_flag, selection_number, selection_ratio):
+def main(in_source, in_destination, is_verbose, save_json_flag, meal_selection_flag, selection_number, selection_ratio, text_destination):
 	output_type_full = is_verbose
 
 	bookmarks_path_short = '~/Library/Safari/Bookmarks.plist'
@@ -46,7 +46,7 @@ def main(in_source, in_destination, is_verbose, save_json_flag, meal_selection_f
 		json_dict = []
 		final_json = get_json(reduced_list, json_dict)
 		sorted_json = sort_output(final_json[0]['children'])
-		with open('foodData.json','w+') as f:
+		with open(text_destination + 'foodData.json','w+') as f:
 			json.dump(sorted_json,f, indent=2, separators=(',', ': '))
 
 	elif meal_selection_flag:
@@ -54,9 +54,10 @@ def main(in_source, in_destination, is_verbose, save_json_flag, meal_selection_f
 		final_json = get_json(reduced_list, json_dict)
 		selected_meals = selection(final_json[0]['children'], selection_number, "Desert", selection_ratio)
 
-
-		for aMeal in selected_meals:
-			print(aMeal)
+		with open(text_destination + '/weeks-meals.txt','w+') as f:
+			for item in selected_meals:
+				f.write(item['name'] + "\n" + item['url'] + "\n")
+				f.write("\n")
 
 	else:
 		bookmarks_dict = {}
@@ -336,8 +337,9 @@ if __name__ == '__main__':
 	parser.add_argument("-s", "--source", type=str, help="Subfolder of bookmarks to save")
 	parser.add_argument("-j","--json", help="Store only JSON store of files - default false", action="store_true")
 	parser.add_argument("-S","--selection", help="Select a number of meals at random", action="store_true")
-	parser.add_argument("-n", "--selection_number", type=int ,help="Number of meals to select at random", default=4)
-	parser.add_argument("-r", "--selection_ratio", type=int ,help="Percentage of meals to select from the tested folder", default=3)
+	parser.add_argument("-n", "--selection_number", type=int, help="Number of meals to select at random", default=4)
+	parser.add_argument("-r", "--selection_ratio", type=int, help="Percentage of meals to select from the tested folder", default=3)
+	parser.add_argument("-t", "--text_destination", type=str, help="Destination for json or tex files", default="~/Desktop")
 
 
 	args = parser.parse_args()
@@ -359,4 +361,4 @@ if __name__ == '__main__':
 		#Enter title of bookmark folder you wish to save here if not using CLI
 		source = 'Cooking'
 
-	main(source, destination, args.verbose, args.json, args.selection, args.selection_number, args.selection_ratio)
+	main(source, destination, args.verbose, args.json, args.selection, args.selection_number, args.selection_ratio, args.text_destination)
