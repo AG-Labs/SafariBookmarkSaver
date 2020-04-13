@@ -1,3 +1,4 @@
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=AG-Labs_SafariBookmarkSaver&metric=alert_status)](https://sonarcloud.io/dashboard?id=AG-Labs_SafariBookmarkSaver)
 # SafariBookmarkSaver
 Python code to save selected safari bookmarks to png images in a defined folder. The motivation for this project is my 'recipe book' which is actually a series of organised bookmarks i've tried and liked and those which I am yet to try. I've sometimes lost dishes to 404 pages or when there was the threat of BBC Good Food shuting down. Therefore the aim of this project is to replicate a bookmarks folder in png's in a permanent location on my computer.
 

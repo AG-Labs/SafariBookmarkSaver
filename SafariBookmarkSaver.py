@@ -15,7 +15,7 @@ breakerCount = 0
 fileSuffix = '-full.png'
 userAgent = {'User-Agent': 'Mozilla/5.0'}
 
-def main(in_source, in_destination, is_verbose, save_json_flag):
+def main(in_source, in_destination, is_verbose, save_json_flag, meal_selection_flag, selection_number, selection_ratio):
 	output_type_full = is_verbose
 
 	bookmarks_path_short = '~/Library/Safari/Bookmarks.plist'
@@ -46,6 +46,13 @@ def main(in_source, in_destination, is_verbose, save_json_flag):
 		sorted_json = sort_output(final_json[0]['children'])
 		with open('foodData.json','w+') as f:
 			json.dump(sorted_json,f, indent=2, separators=(',', ': '))
+
+	elif meal_selection_flag:
+		json_dict = []
+		final_json = get_json(reduced_list, json_dict)
+		print(selection_number)
+		print(selection_ratio)
+		print(final_json)
 
 	else:
 		bookmarks_dict = {}
@@ -288,12 +295,25 @@ def loop_and_save_bookmarks(in_bookmark_dict, out_all_store , out_attempted_stor
 				check_site_and_save(entry['URL'], full_string, out_attempted_args, url_list, full_file_path, True)
 		tracker += 1
 
+def selection(in_dictionary, number_to_select, ignore_folders, tested_percentage):
+	#take in the full updated dict
+	# split into tested and none tested
+	#slect n from tested ignoring the ignore_folders
+	# select m from rest
+	# add these to an array and store that array in the desination
+	pass
+
+
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Save Safari Bookmarks.')
-	parser.add_argument("-v","--verbose", help="Store all descriptor files - default false results in only a description of failed files",action="store_true")
+	parser.add_argument("-v","--verbose", help="Store all descriptor files - default false results in only a description of failed files", action="store_true")
 	parser.add_argument("-d", "--destination", type=str, help="Location to save output files. Please provide only from after the /Users/aUser folder")
 	parser.add_argument("-s", "--source", type=str, help="Subfolder of bookmarks to save")
-	parser.add_argument("-j","--json", help="Store only JSON store of files - default false",action="store_true")
+	parser.add_argument("-j","--json", help="Store only JSON store of files - default false", action="store_true")
+	parser.add_argument("-S","--selection", help="Select a number of meals at random", action="store_true")
+	parser.add_argument("-n", "--selection_number", type=int ,help="Number of meals to select at random", default=4)
+	parser.add_argument("-r", "--selection_ratio", type=int ,help="Percentage of meals to select from the tested folder", default=3)
+
 
 	args = parser.parse_args()
 	# add a ~/ to the front if required
@@ -314,4 +334,4 @@ if __name__ == '__main__':
 		#Enter title of bookmark folder you wish to save here if not using CLI
 		source = 'Cooking'
 
-	main(source, destination, args.verbose, args.json)
+	main(source, destination, args.verbose, args.json, args.selection, args.selection_number, args.selection_ratio)
