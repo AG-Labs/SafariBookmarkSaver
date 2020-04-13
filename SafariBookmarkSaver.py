@@ -9,6 +9,8 @@ import argparse
 import time
 import sys
 import json
+from random import sample
+from math import floor
 
 idKey = 0
 breakerCount = 0
@@ -50,9 +52,11 @@ def main(in_source, in_destination, is_verbose, save_json_flag, meal_selection_f
 	elif meal_selection_flag:
 		json_dict = []
 		final_json = get_json(reduced_list, json_dict)
-		print(selection_number)
-		print(selection_ratio)
-		print(final_json)
+		selected_meals = selection(final_json[0]['children'], selection_number, "Desert", selection_ratio)
+
+
+		for aMeal in selected_meals:
+			print(aMeal)
 
 	else:
 		bookmarks_dict = {}
@@ -296,12 +300,33 @@ def loop_and_save_bookmarks(in_bookmark_dict, out_all_store , out_attempted_stor
 		tracker += 1
 
 def selection(in_dictionary, number_to_select, ignore_folders, tested_percentage):
-	#take in the full updated dict
-	# split into tested and none tested
-	#slect n from tested ignoring the ignore_folders
-	# select m from rest
-	# add these to an array and store that array in the desination
-	pass
+	tested = []
+	flattened_not_tested = []
+
+	for item in in_dictionary:
+		for key, value in item.items():
+			if (key == "name") and (value == "Tested"):
+				tested = item["children"]
+		if 'children' not in item:
+			flattened_not_tested.append(item)
+
+	flattened_tested = flatten_dictionary(tested)
+	number_of_teseted = floor(number_to_select * (tested_percentage / 100))
+
+	to_try_tested = sample( flattened_tested, number_of_teseted)
+	to_try_not = sample( flattened_not_tested, number_to_select - number_of_teseted)
+
+	return to_try_tested + to_try_not
+
+def flatten_dictionary(in_dict):
+	out_dict=[]
+
+	for item in in_dict:
+		if 'children' in item:
+			out_dict = out_dict + flatten_dictionary(item['children'])
+		else:
+			out_dict.append(item)
+	return(out_dict)
 
 
 if __name__ == '__main__':
