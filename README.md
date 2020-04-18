@@ -24,6 +24,16 @@ Once run the result will be an folder with a png for every bookmark and a single
 To run in CLI mode outputting to json the -j flag must be added along with a destination
 for example `python SafariBookmarkSaver.py -j -d ./`
 
+I combine the above CLI operation with another so that I can have recipe ideas selected on a weekly basis from the saved pool this can be done by a cron job if you know when your computer will be on or can be an aliased function on your profile
+For the function 
+
+`alias giveFood="python ~/Documents/Python\ Projects/Food\ Saver/SafariBookmarkSaver.py -S -n 6 -r 70 -t ~/Desktop`
+
+or for the cron job, the osascript at the end is used to create a notification on MacOS
+
+`0 18 * * MON . $HOME/.bash_profile; python ~/Documents/Python Projects/Food Saver/SafariBookmarkSaver.py -S -n 6 -r 70 -t ~/Desktop && osascript -e 'display notification "New Recipes Identified" with title "Recipes"'`
+
+
 ## Authors
 
 * **Andrew Godley** - *All Work* - [AG Labs](https://github.com/AG-Labs)
