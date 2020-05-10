@@ -23,6 +23,7 @@ def main(in_source, in_destination, is_verbose, save_json_flag, meal_selection_f
 	bookmarks_path_short = '~/Library/Safari/Bookmarks.plist'
 	bookmarks_path = os.path.expanduser(bookmarks_path_short)
 	save_to_folder =os.path.expanduser(in_destination)
+	text_destination =os.path.expanduser(text_destination)
 
 	if not os.path.isdir(os.path.dirname(save_to_folder)):
 		print('The folder',os.path.dirname(save_to_folder),'does not exist, please check destination')
@@ -346,6 +347,7 @@ if __name__ == '__main__':
 	# add a ~/ to the front if required
 	destination = args.destination
 	source = args.source
+	text_destination = args.text_destination
 	
 	if destination:
 		if destination[0] != '~':
@@ -357,8 +359,21 @@ if __name__ == '__main__':
 		#Enter title of destination folder you wish to save here if not using CLI
 		destination = '~/OneDrive/Food Save'
 
+	if text_destination:
+		if text_destination != './':
+			if text_destination[0] != '~':
+				if text_destination[0] != '/':
+					text_destination = '~/' + text_destination
+				elif destination[0] == '/':
+					text_destination = '~' + text_destination
+	else:
+		#Enter title of destination folder you wish to save here if not using CLI
+		print('is not present')
+		text_destination = '~/OneDrive/Food Save'
+
+
 	if not source:
 		#Enter title of bookmark folder you wish to save here if not using CLI
 		source = 'Cooking'
 
-	main(source, destination, args.verbose, args.json, args.selection, args.selection_number, args.selection_ratio, args.text_destination)
+	main(source, destination, args.verbose, args.json, args.selection, args.selection_number, args.selection_ratio, text_destination)
