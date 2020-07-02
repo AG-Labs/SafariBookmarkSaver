@@ -33,11 +33,10 @@ def main(in_source, in_destination, is_verbose, save_json_flag, meal_selection_f
 	global breakerCount
 
 	with open(bookmarks_path, 'rb') as fp:
-	    pl = plistlib.load(fp)
-	    full_bookmarks_menu = [item for item in pl['Children'] if 'Title' in item 
-	    and item['Title'] == 'BookmarksMenu'][0]
-	    bookmarks_menu = full_bookmarks_menu['Children']
-	    reduced_list = [item for item in bookmarks_menu if 'Title' in item and item['Title'] == in_source]
+		pl = plistlib.load(fp)
+		full_bookmarks_menu = [item for item in pl['Children'] if 'Title' in item and item['Title'] == 'BookmarksMenu'][0]
+		bookmarks_menu = full_bookmarks_menu['Children']
+		reduced_list = [item for item in bookmarks_menu if 'Title' in item and item['Title'] == in_source]
 
 	if len(reduced_list) == 0:
 		print('The selected folder is empty or does not exists please check source')
