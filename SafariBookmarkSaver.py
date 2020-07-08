@@ -101,8 +101,8 @@ def recursive_search(in_dict, in_string, out_dict):
 			# remove everything from url after the query string 
 			if 'URLString' in a_child:
 				temp_url_string = a_child['URLString']
-				reduced_url_string = re.sub('\?.*$', '', temp_url_string)
-				file_name = re.sub('[^A-Za-z0-9/\s]+', '', a_child['URIDictionary']['title'])
+				reduced_url_string = re.sub('\\?.*$', '', temp_url_string)
+				file_name = re.sub('[^A-Za-z0-9/\\s]+', '', a_child['URIDictionary']['title'])
 				temp_entry = {'folder': in_string, 'file_name': file_name,'URL': reduced_url_string}
 				out_dict[idKey] = temp_entry
 				idKey = idKey + 1
@@ -117,8 +117,8 @@ def get_json(in_dict, in_json):
 		else:
 			# remove everything from url after the query string 
 			if 'URLString' in a_child:
-				reduced_url_string = re.sub('\?.*$', '', a_child['URLString'])
-				file_name = re.sub('[^A-Za-z0-9/\s]+', '', a_child['URIDictionary']['title'])
+				reduced_url_string = re.sub('\\?.*$', '', a_child['URLString'])
+				file_name = re.sub('[^A-Za-z0-9/\\s]+', '', a_child['URIDictionary']['title'])
 				in_json.append({'name':file_name,'url':reduced_url_string,'notes':'', 'active': False, 'toggled': True})
 
 	return(in_json)
@@ -191,9 +191,9 @@ def moved_bookmarks(in_bookmarks, in_files):
 def identify_deleted_bookmarks(in_bookmarks, in_files):
 	#compare all current files against all current bookmarks, if present in files and not
 	#bookmarks delete file at that path
-	for key, entry in in_files.items():
+	for key, _ in in_files.items():
 		present_flag = 0
-		for key2, value in in_bookmarks.items():
+		for _, value in in_bookmarks.items():
 			test_string = value['folder']+'/'+value['file_name']+ fileSuffix
 			if key == test_string:
 				present_flag = 1
@@ -269,7 +269,7 @@ def loop_and_save_bookmarks(in_bookmark_dict, out_all_store , out_attempted_stor
 	url_list = {}
 	tracker = 1
 	total = len(in_bookmark_dict)
-	for key, entry in in_bookmark_dict.items():
+	for _, entry in in_bookmark_dict.items():
 		sys.stdout.write('\rAttempting to save bookmark {} of {}'.format(tracker,total))
 		sys.stdout.flush()
 		#Remove unsafe characters from web titles and create a full file path and

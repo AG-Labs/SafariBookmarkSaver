@@ -10,7 +10,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-Whilst the main bulk of the code will run on any operating system the initial reading of the bookmarks file has only been designed for reading the bookmarks.plist on macOS and the webkit2png module is also macOS only(alternatives to webkit2png seem to be avaliable, though I have not tested them), some slight changes will be needed to re-implement this project for further browsers/operating systems.
+Whilst the main bulk of the code will run on any operating system the initial reading of the bookmarks file has only been designed for reading the bookmarks.plist on macOS and the webkit2png module is also macOS only (alternatives to webkit2png seem to be avaliable, though I have not tested them), some slight changes will be needed to re-implement this project for further browsers/operating systems.
 
 If you have installed webkit2png through homebrew there is an error introduced in the update to .... where non-HTTPS sites are rejected and the ignore-ssl flag does not work. Follow [this](https://github.com/bendalton/webkit2png/commit/9a96ac8977c386a84edb674ca1518e90452cee88) link for simple instructions on how to correct this, further information is avaliable [here](https://github.com/paulhammond/webkit2png/issues/100).
 
