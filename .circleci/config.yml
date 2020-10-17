@@ -1,0 +1,76 @@
+version: 2.1
+
+orbs:
+  python: circleci/python@0.2.1
+  slack: circleci/slack@4.0.3
+
+jobs:
+  announce-build:
+    docker:
+      - image: "cimg/base:stable"
+    steps:
+      - when:
+          condition: $CIRCLE_PR_NUMBER
+          steps:
+            - slack/notify:
+                custom: |
+                  {
+                    "blocks": [
+                      {
+                        "type": "section",
+                        "text": {
+                          "type": "mrkdwn",
+                          "text": "Starting build on ${CIRCLE_BRANCH} in ${CIRCLE_PROJECT_REPONAME} on build #${CIRCLE_BUILD_NUM} $CIRCLE_PR_USERNAME ${CIRCLE_PR_USERNAME}"
+                        }
+                      }
+                    ]
+                  }
+                event: always
+                channel: dev
+  # announce-pr:
+  # check-formatting:
+  # dependency-install:
+  # dependency-audit:
+  test:
+    executor: python/default
+    steps:
+      - checkout
+      - python/load-cache
+      - python/install-deps
+      - python/save-cache
+      - run:
+          command: python tests.py
+          name: Test
+  #quality-scan:
+  notify-end-of-test:
+    docker:
+      - image: "cimg/base:stable"
+    steps:
+      - slack/notify:
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "Hello, example\n\n space "
+                  }
+                }
+              ]
+            }
+          event: always
+          channel: dev
+
+workflows:
+  main:
+    jobs:
+      - announce-build:
+          context: Slack
+      - test:
+          requires:
+            - announce-build
+      - notify-end-of-test:
+          requires:
+            - test
+          context: Slack
