@@ -1,3 +1,4 @@
 __pycache__/
 foodData.json
 Bookmarks Failed.txt
+*.pyc
