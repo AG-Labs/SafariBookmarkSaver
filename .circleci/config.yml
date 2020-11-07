@@ -9,26 +9,33 @@ jobs:
     docker:
       - image: "cimg/base:stable"
     steps:
-      - when:
-          condition: $CIRCLE_PR_NUMBER
-          steps:
-            - slack/notify:
-                custom: |
-                  {
-                    "blocks": [
-                      {
-                        "type": "section",
-                        "text": {
-                          "type": "mrkdwn",
-                          "text": "Starting build on ${CIRCLE_BRANCH} in ${CIRCLE_PROJECT_REPONAME} on build #${CIRCLE_BUILD_NUM} $CIRCLE_PR_USERNAME ${CIRCLE_PR_USERNAME}"
-                        }
-                      }
-                    ]
+      - slack/notify:
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "Starting build on ${CIRCLE_BRANCH} in ${CIRCLE_PROJECT_REPONAME} on build #${CIRCLE_BUILD_NUM}"
                   }
-                event: always
-                channel: dev
-  # announce-pr:
-  # check-formatting:
+                }
+              ]
+            }
+          event: always
+          channel: dev
+  check-formatting:
+    executor: python/default
+    steps:
+      - checkout
+      - python/load-cache
+      - python/install-deps
+      - python/save-cache
+      - run:
+          command: |
+            pip install pycodestyle
+            pycodestyle --config ./.pycodestyles --exclude ./venv,./testData.py ./
+          name: Format Check
   # dependency-install:
   # dependency-audit:
   test:
@@ -54,7 +61,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "Hello, example\n\n space "
+                    "text": "finished test, create PR, view test source"
                   }
                 }
               ]
@@ -67,9 +74,8 @@ workflows:
     jobs:
       - announce-build:
           context: Slack
-      - test:
-          requires:
-            - announce-build
+      - test
+      - check-formatting
       - notify-end-of-test:
           requires:
             - test
