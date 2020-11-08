@@ -17,7 +17,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "Starting build on ${CIRCLE_BRANCH} in ${CIRCLE_PROJECT_REPONAME} on build #${CIRCLE_BUILD_NUM}"
+                    "text": "Starting build #<< pipeline.number >> on ${CIRCLE_BRANCH} in ${CIRCLE_PROJECT_REPONAME}"
                   }
                 }
               ]
@@ -50,7 +50,6 @@ jobs:
       - run:
           command: python tests.py
           name: Test
-  #quality-scan:
   notify-end-of-pipeline:
     docker:
       - image: "cimg/base:stable"
@@ -63,12 +62,64 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "finished test, create PR, view test source"
+                    "text": "Build #<< pipeline.number >> on ${CIRCLE_BRANCH} in ${CIRCLE_PROJECT_REPONAME}"
                   }
+                },
+                {
+                  "type": "divider"
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "Create PR"
+                      },
+                      "url": "<< pipeline.project.git_url >>"
+                    },
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Build"
+                      },
+                      "url": "https://app.circleci.com/pipelines/github/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
+                    }
+                  ]
                 }
               ]
             }
-          event: always
+          event: pass
+          channel: dev
+      - slack/notify:
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "finished test, create PR, view test source"
+                  }
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Build"
+                      },
+                      "url": "https://app.circleci.com/pipelines/github/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
+                    }
+                  ]
+                }
+              ]
+            }
+          event: fail
           channel: dev
 
 workflows:
