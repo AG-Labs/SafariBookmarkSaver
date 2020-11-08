@@ -76,9 +76,15 @@ workflows:
     jobs:
       - announce-build:
           context: Slack
-      - test
-      - check-formatting
-      - dependency-audit
+      - test:
+          requires:
+            - announce-build
+      - check-formatting:
+          requires:
+            - announce-build
+      - dependency-audit:
+          requires:
+            - announce-build
       - notify-end-of-pipeline:
           requires:
             - test
