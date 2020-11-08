@@ -33,11 +33,19 @@ jobs:
       - python/save-cache
       - run:
           command: |
-            pip install pycodestyle
-            pycodestyle --config ./.pycodestyles --exclude ./venv,./testData.py ./
+            pycodestyle --count --config ./.pycodestyles --exclude ./venv,./testData.py ./
           name: Format Check
-  # dependency-install:
-  # dependency-audit:
+  dependency-audit:
+    executor: python/default
+    steps:
+      - checkout
+      - python/load-cache
+      - python/install-deps
+      - python/save-cache
+      - run:
+          command: |
+            safety check
+          name: Audit
   test:
     executor: python/default
     steps:
@@ -76,7 +84,10 @@ workflows:
           context: Slack
       - test
       - check-formatting
+      - dependency-audit
       - notify-end-of-test:
           requires:
             - test
+            - check-formatting
+            - dependency-audit
           context: Slack
