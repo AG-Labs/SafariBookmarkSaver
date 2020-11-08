@@ -24,22 +24,11 @@ jobs:
             }
           event: always
           channel: dev
-  dependency-install:
-    executor: python/default
-    steps:
-      - checkout
-      - python/load-cache
-      - python/install-deps
-      - python/save-cache
-      - run:
-          command: ls -lr
   check-formatting:
     executor: python/default
     steps:
       - checkout
-      - python/load-cache
       - python/install-deps
-      - python/save-cache
       - run:
           command: |
             pycodestyle --count --config ./.pycodestyles --exclude ./venv,./testData.py ./
@@ -48,9 +37,7 @@ jobs:
     executor: python/default
     steps:
       - checkout
-      - python/load-cache
       - python/install-deps
-      - python/save-cache
       - run:
           command: |
             safety check
@@ -59,9 +46,7 @@ jobs:
     executor: python/default
     steps:
       - checkout
-      - python/load-cache
       - python/install-deps
-      - python/save-cache
       - run:
           command: python tests.py
           name: Test
@@ -91,16 +76,9 @@ workflows:
     jobs:
       - announce-build:
           context: Slack
-      - dependency-install
-      - test:
-          requires:
-            - dependency-install
-      - check-formatting:
-          requires:
-            - dependency-install
-      - dependency-audit:
-          requires:
-            - dependency-install
+      - test
+      - check-formatting
+      - dependency-audit
       - notify-end-of-pipeline:
           requires:
             - test
