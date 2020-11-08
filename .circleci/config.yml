@@ -24,6 +24,15 @@ jobs:
             }
           event: always
           channel: dev
+  dependency-install:
+    executor: python/default
+    steps:
+      - checkout
+      - python/load-cache
+      - python/install-deps
+      - python/save-cache
+      - run:
+          command: ls -lr
   check-formatting:
     executor: python/default
     steps:
@@ -57,7 +66,7 @@ jobs:
           command: python tests.py
           name: Test
   #quality-scan:
-  notify-end-of-test:
+  notify-end-of-pipeline:
     docker:
       - image: "cimg/base:stable"
     steps:
@@ -82,10 +91,17 @@ workflows:
     jobs:
       - announce-build:
           context: Slack
-      - test
-      - check-formatting
-      - dependency-audit
-      - notify-end-of-test:
+      - dependency-install
+      - test:
+          requires:
+            - dependency-install
+      - check-formatting:
+          requires:
+            - dependency-install
+      - dependency-audit:
+          requires:
+            - dependency-install
+      - notify-end-of-pipeline:
           requires:
             - test
             - check-formatting
