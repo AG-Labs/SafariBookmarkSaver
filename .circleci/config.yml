@@ -48,7 +48,7 @@ jobs:
       - checkout
       - python/install-deps
       - run:
-          command: python tests.py
+          command: coverage run -m unittest discover
           name: Test
   notify-end-of-pipeline:
     docker:
