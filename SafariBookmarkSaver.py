@@ -1,10 +1,11 @@
 from urllib.request import Request, urlopen
+from urllib.error import URLError
 from functools import cmp_to_key
 import plistlib
 import subprocess
 import os
 import re
-from shutil import copy
+from shutil import copy as copy, Error as SHerror
 import argparse
 import time
 import sys
@@ -274,7 +275,7 @@ def check_site_and_save(entry, full_string, out_attempted_args, url_list, full_f
 			save_site_as_picture(entry, full_string, out_attempted_args)
 			if to_save:
 				url_list[entry] = full_file_path
-	except:  # noqa
+	except URLError:  # noqa
 		pass
 
 
@@ -297,7 +298,7 @@ def loop_and_save_bookmarks(in_bookmark_dict, out_all_store, out_attempted_store
 			try:
 				os.mkdir(folder_path)
 				copy(url_list[entry['URL']], folder_path)
-			except:  # noqa
+			except (SHerror, OSError):  # noqa
 				out_attempted_store.append(entry)
 				check_site_and_save(entry['URL'], full_string, out_attempted_args, url_list, full_file_path, False)
 		else:
