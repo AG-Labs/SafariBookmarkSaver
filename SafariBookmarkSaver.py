@@ -355,7 +355,7 @@ if __name__ == '__main__':
 	parser.add_argument("-S", "--selection", help="Select a number of meals at random", action="store_true")
 	parser.add_argument("-n", "--selection_number", type=int, help="Number of meals to select at random", default=4)
 	parser.add_argument("-r", "--selection_ratio", type=int, help="Percentage of meals to select from the tested folder", default=3)
-	parser.add_argument("-t", "--text_destination", type=str, help="Destination for json or tex files", default="~/Desktop")
+	parser.add_argument("-t", "--text_destination", type=str, help="Destination for json or text files", default="~/Desktop")
 
 	args = parser.parse_args()
 	# add a ~/ to the front if required
