@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  python: circleci/python@0.2.1
+  python: circleci/python@1.2.1
   slack: circleci/slack@4.0.3
 
 jobs:
@@ -28,7 +28,8 @@ jobs:
     executor: python/default
     steps:
       - checkout
-      - python/install-deps
+      - python/install-packages:
+          pkg-manager: pip
       - run:
           command: |
             pycodestyle --count --config ./.pycodestyles --exclude ./venv,./testData.py ./
@@ -37,7 +38,8 @@ jobs:
     executor: python/default
     steps:
       - checkout
-      - python/install-deps
+      - python/install-packages:
+          pkg-manager: pip
       - run:
           command: |
             safety check
@@ -46,7 +48,8 @@ jobs:
     executor: python/default
     steps:
       - checkout
-      - python/install-deps
+      - python/install-packages:
+          pkg-manager: pip
       - run:
           command: |
             coverage run -m unittest discover
