@@ -24,6 +24,13 @@ jobs:
             }
           event: always
           channel: dev
+  dependency-install:
+    # Dependency install step means that all later parrallel steps will be able to use the cache
+    executor: python/default
+    steps:
+      - checkout
+      - python/install-packages:
+          pkg-manager: pip
   check-formatting:
     executor: python/default
     steps:
@@ -107,15 +114,18 @@ workflows:
     jobs:
       - announce-build:
           context: Slack
+      - dependency-install:
+          requires:
+            - announce-build
       - test:
           requires:
-            - announce-build
+            - dependency-install
       - check-formatting:
           requires:
-            - announce-build
+            - dependency-install
       - dependency-audit:
           requires:
-            - announce-build
+            - dependency-install
       - notify-end-of-pipeline:
           requires:
             - test
