@@ -54,7 +54,7 @@ def main(in_source, in_destination, is_verbose, save_json_flag, meal_selection_f
 	elif meal_selection_flag:
 		json_dict = []
 		final_json = get_json(reduced_list, json_dict)
-		selected_meals = selection(final_json[0]['children'], selection_number, "Desert", selection_ratio)
+		selected_meals = selection(final_json[0]['children'], selection_number, "Dessert", selection_ratio)
 
 		with open(text_destination + '/weeks-meals.txt', 'w+') as f:
 			for item in selected_meals:
