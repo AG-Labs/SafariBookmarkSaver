@@ -58,12 +58,12 @@ class TestMethods(unittest.TestCase):
             ('/Users/andrewgodley/OneDrive/Food Save/Cooking/Tested/Beef', (), ('Beef orange stirfry recipe  BBC Good Food-full.png', 'Red Wine Cheeseburgers Jennifer Meyering-full.png', 'Beef Curry Udon Recipe-full.png', 'Beef bulgogi stirfry recipe-full.png', 'Greekstyle stuffed peppers with beef-full.png', 'Chilli con carne-full.png'))
         ]
 
-        folderItems = SafariBookmarkSaver.folder_search(os.path.expanduser("~/OneDrive/Food Save/Cooking/Tested/Beef/"))
-        self.assertEqual(folderItems, testData.searchedFolder)
+        folder_items = SafariBookmarkSaver.folder_search(os.path.expanduser("~/OneDrive/Food Save/Cooking/Tested/Beef/"))
+        self.assertEqual(folder_items, testData.searchedFolder)
 
     def test_reduce_dictionary(self):
-        reducedDictionary = SafariBookmarkSaver.reduce_dictionary(testData.recursiveSearched, testData.reduceFiles)
-        self.assertEqual(len(reducedDictionary), len(testData.recursiveSearched) - 2)
+        reduced_dictionary = SafariBookmarkSaver.reduce_dictionary(testData.recursiveSearched, testData.reduceFiles)
+        self.assertEqual(len(reduced_dictionary), len(testData.recursiveSearched) - 2)
 
     @patch('SafariBookmarkSaver.os.remove')
     def test_deleted_bookmarks(self, mock_remove):
@@ -78,9 +78,9 @@ class TestMethods(unittest.TestCase):
 
         mock_os.path.isdir.side_effect = [True, False]
 
-        movedBookmarks = SafariBookmarkSaver.moved_bookmarks(testData.recursiveSearched, testData.movedFiles)
+        moved_bookmarks = SafariBookmarkSaver.moved_bookmarks(testData.recursiveSearched, testData.movedFiles)
         self.assertEqual(mock_os.mkdir.call_count, 1)
-        self.assertEqual(len(testData.recursiveSearched), len(movedBookmarks) + 2)
+        self.assertEqual(len(testData.recursiveSearched), len(moved_bookmarks) + 2)
 
 
 if __name__ == '__main__':
