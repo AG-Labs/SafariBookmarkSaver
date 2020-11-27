@@ -45,9 +45,8 @@ class TestMethods(unittest.TestCase):
         self.assertEqual(mock_sample.call_count, 2)
         self.assertEqual(selected, testData.selected)
 
-
     @patch('SafariBookmarkSaver.os.walk')
-    def test_folder_search(self, mock_walk ):
+    def test_folder_search(self, mock_walk):
 
         mock_walk.return_value = [
             ('/Users', ('andrewgodley',), ()),
@@ -56,16 +55,16 @@ class TestMethods(unittest.TestCase):
             ('/Users/andrewgodley/OneDrive/Food Save', ('Cooking', ), ()),
             ('/Users/andrewgodley/OneDrive/Food Save/Cooking', ('Tested', ), ()),
             ('/Users/andrewgodley/OneDrive/Food Save/Cooking/Tested', ('Beef', ), ()),
-            ('/Users/andrewgodley/OneDrive/Food Save/Cooking/Tested/Beef', (), ('Beef orange stirfry recipe  BBC Good Food-full.png', 'Red Wine Cheeseburgers Jennifer Meyering-full.png','Beef Curry Udon Recipe-full.png','Beef bulgogi stirfry recipe-full.png','Greekstyle stuffed peppers with beef-full.png','Chilli con carne-full.png'))
+            ('/Users/andrewgodley/OneDrive/Food Save/Cooking/Tested/Beef', (), ('Beef orange stirfry recipe  BBC Good Food-full.png', 'Red Wine Cheeseburgers Jennifer Meyering-full.png', 'Beef Curry Udon Recipe-full.png', 'Beef bulgogi stirfry recipe-full.png', 'Greekstyle stuffed peppers with beef-full.png', 'Chilli con carne-full.png'))
         ]
 
         folderItems = SafariBookmarkSaver.folder_search(os.path.expanduser("~/OneDrive/Food Save/Cooking/Tested/Beef/"))
-        self.assertEqual(folderItems,testData.searchedFolder)
+        self.assertEqual(folderItems, testData.searchedFolder)
 
     def test_reduce_dictionary(self):
         reducedDictionary = SafariBookmarkSaver.reduce_dictionary(testData.recursiveSearched, testData.reduceFiles)
-        self.assertEqual(len(reducedDictionary), len(testData.recursiveSearched)-2)
-    
+        self.assertEqual(len(reducedDictionary), len(testData.recursiveSearched) - 2)
+
     @patch('SafariBookmarkSaver.os.remove')
     def test_deleted_bookmarks(self, mock_remove):
         SafariBookmarkSaver.identify_deleted_bookmarks(testData.recursiveSearched, testData.deletedFiles)
@@ -81,8 +80,7 @@ class TestMethods(unittest.TestCase):
 
         movedBookmarks = SafariBookmarkSaver.moved_bookmarks(testData.recursiveSearched, testData.movedFiles)
         self.assertEqual(mock_os.mkdir.call_count, 1)
-        self.assertEqual(len(testData.recursiveSearched), len(movedBookmarks)+2)
-
+        self.assertEqual(len(testData.recursiveSearched), len(movedBookmarks) + 2)
 
 
 if __name__ == '__main__':
