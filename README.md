@@ -1,5 +1,4 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=AG-Labs_SafariBookmarkSaver&metric=alert_status)](https://sonarcloud.io/dashboard?id=AG-Labs_SafariBookmarkSaver)
-
 [![<AG-Labs>](https://circleci.com/gh/AG-Labs/SafariBookmarkSaver.svg?style=svg)](https://circleci.com/gh/AG-Labs/SafariBookmarkSaver)
 
 # SafariBookmarkSaver
