@@ -37,7 +37,7 @@ class TestMethods(unittest.TestCase):
 
     @patch('SafariBookmarkSaver.sample')
     def test_selection(self, mock_sample):
-        mock_sample.side_effect = [[{'name': '8 Healthy Salad Dressing Recipes You Should Make at Home', 'url': 'https://wholefully.com/healthy-salad-dressing-recipes/', 'notes': '', 'active': False, 'toggled': True}], [{'name': 'Vegan Chickpea Omelet', 'url': 'http://www.forkandbeans.com/2015/01/15/vegan-chickpea-omelet/', 'notes': '', 'active': False, 'toggled': True}]]
+        mock_sample.side_effect = [[{'name': '8 Healthy Salad Dressing Recipes You Should Make at Home', 'url': 'https://wholefully.com/healthy-salad-dressing-recipes/', 'notes': '', 'active': False, 'toggled': True}], [{'name': 'Vegan Chickpea Omelet', 'url': 'https://www.forkandbeans.com/2015/01/15/vegan-chickpea-omelet/', 'notes': '', 'active': False, 'toggled': True}]]
 
         selected = SafariBookmarkSaver.selection(testData.sortedData, 2, "", 50)
 
