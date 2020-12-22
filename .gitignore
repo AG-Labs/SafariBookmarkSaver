@@ -4,3 +4,4 @@ Bookmarks Failed.txt
 *.pyc
 .coverage
 htmlcov/
+test-reports/

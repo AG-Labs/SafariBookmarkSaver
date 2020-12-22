@@ -2,3 +2,4 @@ PyQt5
 pycodestyle
 safety
 coverage
+unittest-xml-reporting
