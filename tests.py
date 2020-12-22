@@ -4,6 +4,7 @@ import SafariBookmarkSaver
 import testData
 from unittest.mock import patch, call
 import os
+import xmlrunner
 
 
 class TestMethods(unittest.TestCase):
@@ -84,4 +85,4 @@ class TestMethods(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))
